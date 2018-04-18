@@ -1,18 +1,19 @@
-package sample.Controller;
-
+// jFoenix Imports
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
+// JavaFX Imports
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
-
+// Java Imports
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class JournalMakerController implements Initializable {
+public class JournalMakerController implements Initializable
+{
 
     @FXML
     private AnchorPane pane;
@@ -52,16 +53,20 @@ public class JournalMakerController implements Initializable {
     private JFXButton cancel;
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL url, ResourceBundle rb)
+    {
         //Initialize
     }
 
-    public void saveButtonAction(ActionEvent event) {
-        System.out.println("Dette er et klik fra Gem knappen");
+
+    public void saveButtonAction(ActionEvent event)
+    {
+        // Action when the save button has been pressed should be written here.
     }
 
-    public void cancelButtonAction(ActionEvent event) {
-        System.out.println("Dette er et klik fra Anuller knappen");
+    public void cancelButtonAction(ActionEvent event)
+    {
+        // Action when the cancel button has been pressed should be written here.
     }
 }
 
