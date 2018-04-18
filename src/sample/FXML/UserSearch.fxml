@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import java.net.URL?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="120.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UserSearchController">
+    <stylesheets>
+        <URL value="@UserSearch.css" />
+    </stylesheets>
+    <children>
+        <JFXTextField fx:id="usernameField" focusColor="#2c3e50" labelFloat="true" layoutX="10.0" layoutY="33.0" prefHeight="25.0" prefWidth="280.0" promptText="Enter CPR" />
+        <JFXButton fx:id="CPRButtonAction" layoutX="10.0" layoutY="74.0" onAction="#CPRButtonAction" prefHeight="32.0" prefWidth="280.0" styleClass="jfx-button" text="Søg" textFill="WHITE" />
+    </children>
+</AnchorPane>
