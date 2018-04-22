@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Patient.Controller.PatientController">
+    <children>
+        <JFXTextField focusColor="#2c3e50" layoutX="25.0" layoutY="43.0" prefHeight="25.0" prefWidth="350.0" promptText="Enter key" />
+        <JFXButton layoutX="25.0" layoutY="82.0" prefHeight="25.0" prefWidth="350.0" text="Login" onAction="#loginButtonAction" />
+    </children>
+</AnchorPane>
