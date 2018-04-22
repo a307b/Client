@@ -1,20 +1,23 @@
+package Doctor.Controller;
+
 // jFoenix Imports
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
+
 // JavaFX Imports
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
+
 // Java Imports
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class JournalMakerController implements Initializable
 {
-
     @FXML
     private AnchorPane pane;
     @FXML

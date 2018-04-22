@@ -1,4 +1,4 @@
-package sample.Controller;
+package Doctor.Controller;
 
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
@@ -9,17 +9,19 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 
-public class UserSearchController implements Initializable {
-
+public class UserSearchController implements Initializable
+{
     @FXML
     private JFXTextField usernameField;
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL url, ResourceBundle rb)
+    {
         //initialize
     }
 
-    public void CPRButtonAction(ActionEvent event) {
+    public void CPRButtonAction(ActionEvent event)
+    {
         System.out.println("Dette er en test");
     }
 }

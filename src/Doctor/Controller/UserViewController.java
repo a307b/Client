@@ -1,4 +1,4 @@
-package sample.Controller;
+package Doctor.Controller;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
@@ -11,8 +11,8 @@ import javafx.scene.layout.AnchorPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class UserViewController implements Initializable {
-
+public class UserViewController implements Initializable
+{
     @FXML
     private AnchorPane pane;
 
@@ -32,22 +32,26 @@ public class UserViewController implements Initializable {
     private JFXButton deleteJournal;
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL url, ResourceBundle rb)
+    {
         //initialize
     }
 
     @FXML
-    public void deleteJournalButton(ActionEvent event) {
+    public void deleteJournalButton(ActionEvent event)
+    {
 
     }
 
     @FXML
-    public void editJournalButton(ActionEvent event) {
+    public void editJournalButton(ActionEvent event)
+    {
 
     }
 
     @FXML
-    public void makeJournalButton(ActionEvent event) {
+    public void makeJournalButton(ActionEvent event)
+    {
 
     }
 

@@ -1,4 +1,5 @@
-package sample.Controller;
+package Doctor.Controller;
 
-public class PatientController {
+public class PatientController
+{
 }
