@@ -61,7 +61,6 @@ public class JournalMakerController implements Initializable
         //Initialize
     }
 
-
     public void saveButtonAction(ActionEvent event)
     {
         // Action when the save button has been pressed should be written here.
