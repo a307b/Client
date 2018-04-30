@@ -8,6 +8,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 
@@ -17,6 +18,10 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 
@@ -58,7 +63,7 @@ public class UserSearchController implements Initializable
     {
         //System.out.println("establish mysql connection and save connection. if failed, notify using messagebox");
 
-        // TODO: Store AES-key + IV in MySQL server, but that happens in JournalMakerController
+        // TODO: Put this shit in JournalMakerController
         String cprString = usernameField.getText();
 
         SecureRandom random = new SecureRandom();
@@ -66,10 +71,30 @@ public class UserSearchController implements Initializable
         byte key[] = new byte[32]; // 256 bits
         random.nextBytes(key);
 
-        byte initVector[] = new byte[16]; // 128 bits
-        random.nextBytes(initVector);
+        byte IV[] = new byte[16]; // 128 bits
+        random.nextBytes(IV);
 
-        System.out.println(encrypt(key, initVector, cprString));
+        System.out.println(encrypt(key, IV, cprString));
+
+        byte[] keyIV = new byte[key.length + IV.length];
+        System.arraycopy(key, 0, keyIV, 0, key.length);
+        System.arraycopy(IV, 0, keyIV, key.length, IV.length);
+
+        String aesKeyBase64 = Base64.encodeBase64String(keyIV);
+
+        try
+        {
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/p2","root","ascent"); // p2 is db name
+            Statement stmt = con.createStatement();
+
+            // Execute SQL query to insert the "transaction"
+            stmt.executeUpdate("INSERT INTO tran (cpr, trans_id, aes_key) VALUES (3112999999,'f9777aae-ef68-44e7-bc9b-8758c20069a3','"+aesKeyBase64+"')");
+        }
+        catch(Exception e)
+        {
+            System.out.printf(e.getMessage());
+        }
+
 
 
         /*
