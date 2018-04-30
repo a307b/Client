@@ -9,9 +9,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import org.apache.commons.codec.binary.Base64;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ResourceBundle;
 
 
@@ -26,12 +31,48 @@ public class UserSearchController implements Initializable
         System.out.println("do nothing here");
     }
 
+    public static String encrypt(byte[] key, byte[] initVector, String value)
+    {
+        // TODO: Move to own class
+        try
+        {
+            IvParameterSpec iv = new IvParameterSpec(initVector);
+            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+            byte[] encrypted = cipher.doFinal(value.getBytes());
+
+            return Base64.encodeBase64String(encrypted);
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
     public void CPRButtonAction(ActionEvent event)
     {
         //System.out.println("establish mysql connection and save connection. if failed, notify using messagebox");
 
+        // TODO: Store AES-key + IV in MySQL server, but that happens in JournalMakerController
         String cprString = usernameField.getText();
 
+        SecureRandom random = new SecureRandom();
+
+        byte key[] = new byte[32]; // 256 bits
+        random.nextBytes(key);
+
+        byte initVector[] = new byte[16]; // 128 bits
+        random.nextBytes(initVector);
+
+        System.out.println(encrypt(key, initVector, cprString));
+
+
+        /*
         if (cprString.length() != 10)
         {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -52,7 +93,7 @@ public class UserSearchController implements Initializable
             return;
         }
 
-
+        */
 
 
         /*
