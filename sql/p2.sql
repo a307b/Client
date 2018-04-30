@@ -2,13 +2,19 @@
 -- Host:                         127.0.0.1
 -- Server version:               5.5.9-log - MySQL Community Server (GPL)
 -- Server OS:                    Win32
--- HeidiSQL Version:             9.1.0.4867
+-- HeidiSQL Version:             9.4.0.5125
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+
+
+-- Dumping database structure for p2
+CREATE DATABASE IF NOT EXISTS `p2` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `p2`;
 
 -- Dumping structure for table p2.borger
 CREATE TABLE IF NOT EXISTS `borger` (
@@ -19,27 +25,27 @@ CREATE TABLE IF NOT EXISTS `borger` (
 -- Dumping data for table p2.borger: ~3 rows (approximately)
 /*!40000 ALTER TABLE `borger` DISABLE KEYS */;
 INSERT INTO `borger` (`cpr`, `rsapublickey`) VALUES
-	('test', _binary 0x68656C6C6F20776F726C64),
-	('123', _binary 0x68656C6C6F20776F726C64),
-	('0011223344', _binary 0x30820122300D06092A864886F70D01010105000382010F003082010A0282010100CA22FA2123DD5DE8290CC6D6DB583E71074A05C309E6532891AC02249ABCF98FAD61CC2F34645B584C39945FD7237219E3671C20F5E33A37E56DBED5E29BE79E3A6EA4B0044DAA69734AA1320D17FC19ADFE5FD4A14A59FE538BBE704B0B62D269D56E1337A9A21A5D2292A6BF9423D204544DEE65E53126AC2A2C4426514E4F067BAC01A45D5500E8B21FF34C48387EBE858765EC9B549DC536F9A55E5FCB8730C73CDB238E074111B46585307C359577DC3CB9A68A422D4DBA4CAEE0AFC4BD5577DBB707C1E91FB61226587A916032CD7B29120B60ED7ABA124F3B97AAD097DE90C016E837B791F1364D2520A2B2ACDBE4412FE77A32843E8FAD10AF26C10B0203010001);
+	('test', 'hello world'),
+	('123', 'hello world'),
+	('0011223344', '0�"0\r	*�H��\r\0�\00�\n�\0�"�!#�]�)���X>qJ�	�S(��$�����a�/4d[XL9�_�#r�g ��:7�m����:n��M�isJ�2\r���_ԡJY�S��pKb�i�n7��]"����#�TM�e�1&�*,D&QNO{��]U\0��LH8~���e�T��6��^_ˇ0�<�#�A�e�0|5�w�<���B-M�L��ĽUw۷���&Xz�`2�{)`�z�O;��Зސ��7���6M% �����A/�z2�>���&�\0');
 /*!40000 ALTER TABLE `borger` ENABLE KEYS */;
 
-
--- Dumping structure for table p2.transdb
-CREATE TABLE IF NOT EXISTS `transdb` (
+-- Dumping structure for table p2.transaction
+CREATE TABLE IF NOT EXISTS `transaction` (
   `cpr` tinytext NOT NULL,
   `transid` text NOT NULL,
   `aeskey` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table p2.transdb: ~4 rows (approximately)
-/*!40000 ALTER TABLE `transdb` DISABLE KEYS */;
-INSERT INTO `transdb` (`cpr`, `transid`, `aeskey`) VALUES
+-- Dumping data for table p2.transaction: ~4 rows (approximately)
+/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
+INSERT INTO `transaction` (`cpr`, `transid`, `aeskey`) VALUES
 	('2502125742', '89384ece-9cfc-42b6-9e7a-34c01d59ee65\r\n', 'ZnOsYgP78Ue7CtcVu76BzNQLTrHi6Tszz6AtF1ZEHZA='),
 	('2102514362', 'd0dae001-d216-446f-83a9-72ab1b868505', '44WwLDERRHTubnN0zmORqZes3jZSjQHUEpPgoG5tP1w=	\r\n'),
 	('2502125742', '7e6e5410-470f-46f9-a120-6d1f37103005', 'pQHkvL+rJW7Ca8JK3pQq2YyC9AqSQi62b6Gv08cbwrg='),
 	('1503714143', 'f9777aae-ef68-44e7-bc9b-8758c20069a3', 'COuav5OugPpTuv39k77FtPacrNJZS4lxUPD7XLdUBqk=');
-/*!40000 ALTER TABLE `transdb` ENABLE KEYS */;
+/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
+
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
