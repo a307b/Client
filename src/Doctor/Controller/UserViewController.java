@@ -64,7 +64,6 @@ public class UserViewController implements Initializable
 
     @FXML public void handleMouseClick(MouseEvent mouseEvent)
     {
-
         if(mouseEvent.getClickCount() == 2)
             System.out.println("Double clicked");
 
@@ -75,6 +74,7 @@ public class UserViewController implements Initializable
     {
         //System.out.println("ez method call, here's our string " + nice);
 
+        /*
         try
         {
             Connection con= DriverManager.getConnection("jdbc:mysql://localhost:3306/p2","root","ascent"); // p2 is db name
@@ -89,7 +89,7 @@ public class UserViewController implements Initializable
         {
             System.out.println(e);
         }
-
+        */
         //list.getItems().add(new Label(nice));
     }
 
