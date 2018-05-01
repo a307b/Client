@@ -10,7 +10,7 @@
         <URL value="@UserSearch.css" />
     </stylesheets>
     <children>
-        <JFXTextField fx:id="usernameField" focusColor="#2c3e50" labelFloat="true" layoutX="10.0" layoutY="33.0" prefHeight="25.0" prefWidth="280.0" promptText="Enter CPR" />
+        <JFXTextField fx:id="cprTextField" focusColor="#2c3e50" labelFloat="true" layoutX="10.0" layoutY="33.0" prefHeight="25.0" prefWidth="280.0" promptText="Enter CPR" />
         <JFXButton fx:id="CPRButtonAction" layoutX="10.0" layoutY="74.0" onAction="#CPRButtonAction" prefHeight="32.0" prefWidth="280.0" styleClass="jfx-button" text="Søg" textFill="WHITE" />
     </children>
 </AnchorPane>
