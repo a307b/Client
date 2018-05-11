@@ -1,27 +1,22 @@
-package Doctor.Controller;
+package Patient.Controller;
 
+import com.itextpdf.kernel.crypto.AESCipher;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
+import supportClasses.AESKeyEncryptor;
 
-import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class UserViewController implements Initializable
+public class PatientViewController implements Initializable
 {
     @FXML
     private AnchorPane pane;
@@ -43,6 +38,10 @@ public class UserViewController implements Initializable
 
     private String passedEZ = "123";
 
+    private ArrayList<AESKeyEncryptor> AESKeyStore;
+
+
+
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
@@ -58,55 +57,44 @@ public class UserViewController implements Initializable
     @FXML
     public void editJournalButton(ActionEvent event)
     {
-      //  findTransactions();
-        UserSearchController userSearchController = new UserSearchController();
-        System.out.println(userSearchController.getCprTextField());
+
     }
 
     @FXML
     public void makeJournalButton(ActionEvent event)
     {
-        try
-        {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/Journalmaker.fxml"));
-            Parent root1 = fxmlLoader.load();
 
-            JournalMakerController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
-
-            Stage stage = new Stage();
-            stage.setTitle("Journal Maker");
-            stage.setScene(new Scene(root1, 830, 600));
-            stage.show();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
-    @FXML
-    public void handleMouseClick(MouseEvent mouseEvent)
+    @FXML public void handleMouseClick(MouseEvent mouseEvent)
     {
-        if (mouseEvent.getClickCount() == 2)
+        if(mouseEvent.getClickCount() == 2)
             System.out.println("Double clicked");
 
         System.out.println("clicked on " + list.getSelectionModel().getSelectedItem().getText());
     }
 
-    public void findTransactions(String searchedCPR)
+    public void test(String nice)
     {
+        //System.out.println("ez method call, here's our string " + nice);
+
+        /*
         try
         {
-            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
+            Connection con= DriverManager.getConnection("jdbc:mysql://localhost:3306/p2","root","ascent"); // p2 is db name
             Statement stmt=con.createStatement();
-            ResultSet rs=stmt.executeQuery("SELECT transid FROM TransDB WHERE cpr = "+ searchedCPR +"");
-
+            ResultSet rs=stmt.executeQuery("select * from testtable");
             while(rs.next())
                 list.getItems().add(new Label(rs.getString(1)));
+
             con.close();
         }
         catch(Exception e)
         {
             System.out.println(e);
         }
+        */
+        //list.getItems().add(new Label(nice));
     }
+
 }

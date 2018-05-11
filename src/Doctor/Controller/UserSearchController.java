@@ -40,7 +40,10 @@ public class UserSearchController implements Initializable
         System.out.println("do nothing here");
     }
 
-
+    public String getCprTextField()
+    {
+        return cprTextField.getText();
+    }
 
     public void CPRButtonAction(ActionEvent event)
     {
@@ -68,9 +71,11 @@ public class UserSearchController implements Initializable
 
         try
         {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/p2","root","ascent"); // p2 is db name
+            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM borger WHERE cpr = "+cprString);
+            ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + cprString);
+            System.out.println(rs.next());
+/*
 
             if (rs.next())
             {
@@ -111,8 +116,9 @@ public class UserSearchController implements Initializable
                 con.close();
                 return;
             }
-
             con.close();
+
+*/
         }
         catch(Exception e)
         {
@@ -124,12 +130,12 @@ public class UserSearchController implements Initializable
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
             Parent root1 = fxmlLoader.load();
 
-            UserViewController controller = fxmlLoader.getController(); // Pass params to UserViewController using method
-            //controller.test(usernameField.getText());
+            UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
+            controller.findTransactions(cprTextField.getText());
 
             Stage stage = new Stage();
             stage.setTitle("User View");
-            stage.setScene(new Scene(root1,500,500));
+            stage.setScene(new Scene(root1,450,500));
             stage.show();
         } catch (IOException e)
         {

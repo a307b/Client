@@ -18,7 +18,7 @@ public class Main extends Application
     {
         Parent root = FXMLLoader.load(getClass().getResource("Design/UserSearch.fxml"));
         primaryStage.setTitle("User Search");
-        primaryStage.setScene(new Scene(root, 840, 580));
+        primaryStage.setScene(new Scene(root, 300, 130));
         primaryStage.show();
     }
 }

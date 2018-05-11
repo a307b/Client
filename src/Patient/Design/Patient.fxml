@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextArea?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Patient.Controller.PatientController">
+<?import java.net.URL?>
+<AnchorPane maxHeight="40" maxWidth="120" minHeight="40" minWidth="120" prefHeight="40.0" prefWidth="120.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Patient.Controller.PatientController">
+    <stylesheets>
+        <URL value="@Patient.css" />
+    </stylesheets>
     <children>
-        <JFXTextField focusColor="#2c3e50" layoutX="25.0" layoutY="43.0" prefHeight="25.0" prefWidth="350.0" promptText="Enter key" />
-        <JFXButton layoutX="25.0" layoutY="82.0" prefHeight="25.0" prefWidth="350.0" text="Login" onAction="#loginButtonAction" />
+        <JFXTextArea focusColor="#2c3e50" layoutX="35.0" layoutY="5.0" prefHeight="50.0" prefWidth="300.0" promptText="Enter RSA Private Key" />
+        <JFXPasswordField focusColor="#2c3e50" layoutX="35.0" layoutY="70.0" prefHeight="25.0" prefWidth="300.0" promptText="Enter CPR Number" />
+        <JFXButton layoutX="35.0" layoutY="120.0" prefHeight="25.0" prefWidth="300.0" text="Login" onAction="#loginButtonAction" />
     </children>
 </AnchorPane>

@@ -17,8 +17,8 @@ public class Main extends Application
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("Design/Patient.fxml"));
-        primaryStage.setTitle("UserSearch");
-        primaryStage.setScene(new Scene(root, 840, 580));
+        primaryStage.setTitle("User Login");
+        primaryStage.setScene(new Scene(root, 370, 160));
         primaryStage.show();
     }
 }
