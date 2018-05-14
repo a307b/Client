@@ -43,13 +43,11 @@ public class UserSearchController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        //System.out.println("do nothing here");
-
         try
         {
             File privateKeyFile = new File(privateKeyLocation);
 
-            if(!privateKeyFile.exists())
+            if (!privateKeyFile.exists())
             {
                 KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
                 keyGen.initialize(1024);
@@ -63,19 +61,15 @@ public class UserSearchController implements Initializable
                 privateKeyWriter.println(Base64.encodeBase64String(privateKeyBytes));
                 privateKeyWriter.close();
             }
+            else
+            {
+                byte[] keyBytes = Base64.decodeBase64(Files.readAllBytes(Paths.get(privateKeyLocation)));
 
+                PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+                privateKey = KeyFactory.getInstance("RSA").generatePrivate(spec);
 
-
-
-
-
-            /*
-            byte[] keyBytes = Files.readAllBytes(Paths.get("src/Doctor/privatekey"));
-
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = kf.generatePrivate(spec);
-            */
+                
+            }
         }
         catch (Exception e)
         {
