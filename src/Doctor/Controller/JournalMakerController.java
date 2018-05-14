@@ -1,6 +1,7 @@
 package Doctor.Controller;
 
 // jFoenix Imports
+import Doctor.Block;
 import Doctor.Blockchain;
 import Doctor.Journal;
 import com.jfoenix.controls.JFXButton;
@@ -17,6 +18,8 @@ import javafx.scene.layout.AnchorPane;
 import org.apache.commons.codec.binary.Base64;
 
 // Java Imports
+import java.io.*;
+import java.net.Socket;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.sql.Connection;
@@ -100,10 +103,12 @@ public class JournalMakerController implements Initializable
         String decryptedData = journal.decrypt(encryptedData, aesKeyBase64);
         System.out.println("Decrypted : " + decryptedData);
 
+
+
         // Send to DB
         Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
         Statement stmt = con.createStatement();
-        stmt.executeUpdate("INSERT INTO TransDB (cpr, transid, aeskey) VALUES ('"+CPR.getText()+"','"+getTransID()+"','"+aesKeyBase64+"')");
+        stmt.executeUpdate("INSERT INTO trans (cpr, transid, aeskey) VALUES ('"+CPR.getText()+"','"+getTransID()+"','"+aesKeyBase64+"')");
 
 /*        // Encrypt AES Key
         String sql = ("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + CPR.getText()+"");

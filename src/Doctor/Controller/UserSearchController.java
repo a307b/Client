@@ -1,5 +1,6 @@
 package Doctor.Controller;
 
+import Doctor.Block;
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,21 +9,18 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 
@@ -66,11 +64,13 @@ public class UserSearchController implements Initializable
             return;
         }
 
+        List<Block> blockList = new ArrayList<>();
+
         try
         {
             Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + cprString);
+            ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM borger WHERE cpr = " + cprString);
 
             if (!rs.next())
             {
@@ -97,15 +97,34 @@ public class UserSearchController implements Initializable
                 int count = br.read();
                 for (int i = 0; i < count; ++i)
                 {
-                    System.out.println("Block number " + (i + 1));
-                    System.out.println(br.readLine());
-                    System.out.println(br.readLine());
-                    System.out.println(br.readLine());
+                    Block block = new Block();
+                    block.id = br.readLine();
+                    block.data = br.readLine();
+
+                    blockList.add(block);
                 }
             }
             catch (IOException e)
             {
                 System.out.println(e.getMessage());
+            }
+
+            try
+            {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
+                Parent root1 = fxmlLoader.load();
+
+                UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
+                controller.passBlockList(blockList);
+
+                Stage stage = new Stage();
+                stage.setTitle("User View");
+                stage.setScene(new Scene(root1,450,500));
+                stage.show();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
 /*
 
@@ -158,23 +177,7 @@ public class UserSearchController implements Initializable
         }
 
         /*
-        try
-        {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
-            Parent root1 = fxmlLoader.load();
 
-            UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
-            controller.findTransactions(cprTextField.getText());
-
-            Stage stage = new Stage();
-            stage.setTitle("User View");
-            stage.setScene(new Scene(root1,450,500));
-            stage.show();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
         */
     }
 }

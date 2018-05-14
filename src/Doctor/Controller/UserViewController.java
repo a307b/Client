@@ -1,5 +1,6 @@
 package Doctor.Controller;
 
+import Doctor.Block;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import javafx.event.ActionEvent;
@@ -15,10 +16,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class UserViewController implements Initializable
@@ -40,8 +39,6 @@ public class UserViewController implements Initializable
 
     @FXML
     private JFXButton deleteJournal;
-
-    private String passedEZ = "123";
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -92,21 +89,14 @@ public class UserViewController implements Initializable
         System.out.println("clicked on " + list.getSelectionModel().getSelectedItem().getText());
     }
 
-    public void findTransactions(String searchedCPR)
+    public void passBlockList(List<Block> blockList)
     {
-        try
-        {
-            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
-            Statement stmt=con.createStatement();
-            ResultSet rs=stmt.executeQuery("SELECT transid FROM TransDB WHERE cpr = "+ searchedCPR +"");
+        //
 
-            while(rs.next())
-                list.getItems().add(new Label(rs.getString(1)));
-            con.close();
-        }
-        catch(Exception e)
-        {
-            System.out.println(e);
-        }
+        // A blockchain goes from oldest to newest, therefore reverse the list to get the latest journal at the top
+        Collections.reverse(blockList);
+
+        for (Block block : blockList)
+            list.getItems().add(new Label(block.data));
     }
 }
