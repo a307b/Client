@@ -15,6 +15,13 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -26,13 +33,55 @@ import java.util.ResourceBundle;
 
 public class UserSearchController implements Initializable
 {
+    //PrivateKey privateKey;
+    String privateKeyLocation = "src/Doctor/privatekey";
+    PrivateKey privateKey;
+
     @FXML
     private JFXTextField cprTextField;
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        System.out.println("do nothing here");
+        //System.out.println("do nothing here");
+
+        try
+        {
+            File privateKeyFile = new File(privateKeyLocation);
+
+            if(!privateKeyFile.exists())
+            {
+                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                keyGen.initialize(1024);
+                KeyPair keyPair = keyGen.genKeyPair();
+                privateKey = keyPair.getPrivate();
+
+                // Get the bytes of the private key
+                byte[] privateKeyBytes = privateKey.getEncoded();
+
+                PrintWriter privateKeyWriter = new PrintWriter (privateKeyLocation);
+                privateKeyWriter.println(Base64.encodeBase64String(privateKeyBytes));
+                privateKeyWriter.close();
+            }
+
+
+
+
+
+
+            /*
+            byte[] keyBytes = Files.readAllBytes(Paths.get("src/Doctor/privatekey"));
+
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PrivateKey privateKey = kf.generatePrivate(spec);
+            */
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+
     }
 
     public String getCprTextField()
@@ -116,6 +165,7 @@ public class UserSearchController implements Initializable
 
                 UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
                 controller.passBlockList(blockList);
+
 
                 Stage stage = new Stage();
                 stage.setTitle("User View");

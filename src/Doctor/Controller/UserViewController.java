@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.PrivateKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -91,12 +92,17 @@ public class UserViewController implements Initializable
 
     public void passBlockList(List<Block> blockList)
     {
-        //
+
 
         // A blockchain goes from oldest to newest, therefore reverse the list to get the latest journal at the top
         Collections.reverse(blockList);
 
         for (Block block : blockList)
             list.getItems().add(new Label(block.data));
+    }
+
+    public void passPrivateKey(PrivateKey privateKey)
+    {
+
     }
 }
