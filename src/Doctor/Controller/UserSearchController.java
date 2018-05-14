@@ -15,10 +15,7 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.security.SecureRandom;
@@ -74,7 +71,42 @@ public class UserSearchController implements Initializable
             Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + cprString);
-            System.out.println(rs.next());
+
+            if (!rs.next())
+            {
+                System.out.println("Could not find user with following CPR-number: " + cprString);
+                return;
+            }
+
+            byte[] publicKey = rs.getBytes("rsapublickey");
+            byte[] bytesEncoded = Base64.encodeBase64(publicKey);
+
+            try
+            {
+                Socket socket = new Socket("127.0.0.1", 21149);
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                // Send packet using opcode 0
+                bw.write(0);
+                bw.write(new String(bytesEncoded));
+                bw.newLine();
+                bw.flush();
+
+                // Read count of blocks
+                int count = br.read();
+                for (int i = 0; i < count; ++i)
+                {
+                    System.out.println("Block number " + (i + 1));
+                    System.out.println(br.readLine());
+                    System.out.println(br.readLine());
+                    System.out.println(br.readLine());
+                }
+            }
+            catch (IOException e)
+            {
+                System.out.println(e.getMessage());
+            }
 /*
 
             if (rs.next())
@@ -125,6 +157,7 @@ public class UserSearchController implements Initializable
             System.out.println(e.getMessage());
         }
 
+        /*
         try
         {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
@@ -137,9 +170,11 @@ public class UserSearchController implements Initializable
             stage.setTitle("User View");
             stage.setScene(new Scene(root1,450,500));
             stage.show();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
+        */
     }
 }
