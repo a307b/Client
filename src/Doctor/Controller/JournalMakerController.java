@@ -14,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import org.apache.commons.codec.binary.Base64;
 
@@ -21,11 +22,15 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Signature;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -69,6 +74,7 @@ public class JournalMakerController implements Initializable
     private JFXButton cancel;
 
     private String transID;
+    private PrivateKey privateKey;
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -103,6 +109,14 @@ public class JournalMakerController implements Initializable
         String decryptedData = journal.decrypt(encryptedData, aesKeyBase64);
         System.out.println("Decrypted : " + decryptedData);
 
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+        // Send to blockchain, if succesful we add it to DB
+
+        Signature sig = Signature.getInstance("SHA256WithRSA");
+        sig.initSign(privateKey);
+        sig.update("test".getBytes());
+        byte[] signatureBytes = sig.sign();
+        System.out.println("Signature:" + Base64.encodeBase64String(signatureBytes));
 
 
         // Send to DB
@@ -117,11 +131,11 @@ public class JournalMakerController implements Initializable
         System.out.println(borgerPublicKey.length);*/
 
         // Blockchain Creation
-        Blockchain blockchain = new Blockchain(transID, aesKeyBase64, encryptedData,"Public Key");
-        blockchain.setCurrentHash(blockchain.generateHash(encryptedData));
+        // Blockchain blockchain = new Blockchain(transID, aesKeyBase64, encryptedData,"Public Key");
+        // blockchain.setCurrentHash(blockchain.generateHash(encryptedData));
 
         // TODO implement send block
-        blockchain.sendBlock();
+        // blockchain.sendBlock();
     }
 
     public void cancelButtonAction(ActionEvent event)
@@ -196,7 +210,11 @@ public class JournalMakerController implements Initializable
 
         if (examinationDetails.getText().equals(""))
             alertTextAreaNotFilled(examinationDetails);
+    }
 
+    public void passPrivateKey(PrivateKey privKey)
+    {
+        privateKey = privKey;
     }
 
 }

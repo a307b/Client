@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -35,7 +36,10 @@ public class UserSearchController implements Initializable
 {
     //PrivateKey privateKey;
     String privateKeyLocation = "src/Doctor/privatekey";
+    String publicKeyLocation = "src/Doctor/publickey";
+
     PrivateKey privateKey;
+    PublicKey publicKey;
 
     @FXML
     private JFXTextField cprTextField;
@@ -46,31 +50,40 @@ public class UserSearchController implements Initializable
         try
         {
             File privateKeyFile = new File(privateKeyLocation);
+            File publicKeyFile = new File(publicKeyLocation);
 
-            if (!privateKeyFile.exists())
+            if(!privateKeyFile.exists() || !publicKeyFile.exists())
             {
                 KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
                 keyGen.initialize(1024);
                 KeyPair keyPair = keyGen.genKeyPair();
                 privateKey = keyPair.getPrivate();
+                publicKey = keyPair.getPublic();
 
                 // Get the bytes of the private key
                 byte[] privateKeyBytes = privateKey.getEncoded();
+                byte[] publicKeyBytes = publicKey.getEncoded();
 
                 PrintWriter privateKeyWriter = new PrintWriter (privateKeyLocation);
                 privateKeyWriter.println(Base64.encodeBase64String(privateKeyBytes));
                 privateKeyWriter.close();
+
+                PrintWriter publicKeyWriter = new PrintWriter (publicKeyLocation);
+                publicKeyWriter.println(Base64.encodeBase64String(publicKeyBytes));
+                publicKeyWriter.close();
             }
             else
             {
                 byte[] keyBytes = Base64.decodeBase64(Files.readAllBytes(Paths.get(privateKeyLocation)));
 
                 PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-                privateKey = KeyFactory.getInstance("RSA").generatePrivate(spec);
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-                
+                privateKey = keyFactory.generatePrivate(spec);
             }
+
         }
+
         catch (Exception e)
         {
             System.out.println(e.getMessage());
@@ -132,7 +145,7 @@ public class UserSearchController implements Initializable
 
                 // Send packet using opcode 0
                 bw.write(0);
-                bw.write(new String(bytesEncoded));
+                bw.write(new String(bytesEncoded)); // Send the public key to the blockchain as a string
                 bw.newLine();
                 bw.flush();
 
@@ -159,6 +172,7 @@ public class UserSearchController implements Initializable
 
                 UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
                 controller.passBlockList(blockList);
+                controller.passPrivateKey(privateKey);
 
 
                 Stage stage = new Stage();

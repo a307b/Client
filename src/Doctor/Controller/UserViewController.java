@@ -13,10 +13,12 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
+import java.security.Signature;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -41,6 +43,8 @@ public class UserViewController implements Initializable
     @FXML
     private JFXButton deleteJournal;
 
+    private PrivateKey privateKey;
+
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
@@ -64,12 +68,14 @@ public class UserViewController implements Initializable
     @FXML
     public void makeJournalButton(ActionEvent event)
     {
+
         try
         {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/Journalmaker.fxml"));
             Parent root1 = fxmlLoader.load();
 
             JournalMakerController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
+            controller.passPrivateKey(privateKey);
 
             Stage stage = new Stage();
             stage.setTitle("Journal Maker");
@@ -101,8 +107,8 @@ public class UserViewController implements Initializable
             list.getItems().add(new Label(block.data));
     }
 
-    public void passPrivateKey(PrivateKey privateKey)
+    public void passPrivateKey(PrivateKey privKey)
     {
-
+        privateKey = privKey;
     }
 }
