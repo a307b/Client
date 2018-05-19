@@ -47,6 +47,8 @@ public class UserSearchController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+        /* Creates private key if it does note exist at location, otherwise it saves it in the
+         * privateKey property */
         try
         {
             File privateKeyFile = new File(privateKeyLocation);
@@ -110,6 +112,7 @@ public class UserSearchController implements Initializable
             return;
         }
 */
+        /* Throws exception if the entered value is not an number */
         if (!cprString.matches("[0-9]+"))
         {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -120,17 +123,21 @@ public class UserSearchController implements Initializable
             return;
         }
 
+        /* Connects to database and queries data that corresponds to the entered CPR. */
         List<Block> blockList = new ArrayList<>();
-
         try
         {
             Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM borger WHERE cpr = " + cprString);
-
+            /* If no matching CPR is found in the database, throw an error box. */
             if (!rs.next())
             {
-                System.out.println("Could not find user with following CPR-number: " + cprString);
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Søgningsfejl");
+                alert.setHeaderText("Fejl med input af CPR-nummer");
+                alert.setContentText("Kunne ikke finde bruger med CPR-nummeret: " + cprString);
+                alert.show();
                 return;
             }
 
@@ -143,13 +150,14 @@ public class UserSearchController implements Initializable
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                // Send packet using opcode 0
+                /* First sends 0 to the blockchain to activate case 0 in the switch.
+                 * Afterwards sends the public key (encodedBytes). */
                 bw.write(0);
                 bw.write(new String(bytesEncoded)); // Send the public key to the blockchain as a string
                 bw.newLine();
                 bw.flush();
 
-                // Read count of blocks
+                /* Reads received blocks and adds them to blockList */
                 int count = br.read();
                 for (int i = 0; i < count; ++i)
                 {
@@ -170,9 +178,9 @@ public class UserSearchController implements Initializable
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
                 Parent root1 = fxmlLoader.load();
 
-                UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
-                controller.passBlockList(blockList);
-                controller.passPrivateKey(privateKey);
+                UserViewController userViewController = fxmlLoader.getController(); // Pass params to PatientViewController using method
+                userViewController.passBlockList(blockList);
+                userViewController.passPrivateKey(privateKey);
 
 
                 Stage stage = new Stage();
