@@ -73,8 +73,9 @@ public class JournalMakerController implements Initializable
     @FXML
     private JFXButton cancel;
 
-    private String transID;
     private PrivateKey privateKey;
+    private String patientPublicKey;
+    private String journalBlockId;
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -106,23 +107,55 @@ public class JournalMakerController implements Initializable
         // Encryption and decryption test
         System.out.println("AES Key : " + aesKeyBase64);
         byte[] encryptedData = journal.encrypt(journal.toString(), aesKeyBase64);
+        String encryptedDataString = Base64.encodeBase64String(encryptedData);
         String decryptedData = journal.decrypt(encryptedData, aesKeyBase64);
         System.out.println("Decrypted : " + decryptedData);
 
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
         // Send to blockchain, if succesful we add it to DB
 
+
         Signature sig = Signature.getInstance("SHA256WithRSA");
         sig.initSign(privateKey);
-        sig.update("test".getBytes());
+
+        if (journalBlockId != null)
+            sig.update((journalBlockId+encryptedDataString).getBytes());
+        else
+            sig.update(encryptedDataString.getBytes());
+
         byte[] signatureBytes = sig.sign();
-        System.out.println("Signature:" + Base64.encodeBase64String(signatureBytes));
+        System.out.println("Signature: " + Base64.encodeBase64String(signatureBytes));
+
+
+        Socket socket = new Socket("127.0.0.1", 21149);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+        System.out.println(patientPublicKey);
+
+        // Send packet using opcode 1
+        /*bw.write(0);
+
+        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.newLine();
+
+        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.newLine();
+
+        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.newLine();
+
+        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.newLine();
+
+        bw.flush();*/
+
 
 
         // Send to DB
-        Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
+        /*Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
         Statement stmt = con.createStatement();
-        stmt.executeUpdate("INSERT INTO trans (cpr, transid, aeskey) VALUES ('"+CPR.getText()+"','"+getTransID()+"','"+aesKeyBase64+"')");
+        stmt.executeUpdate("INSERT INTO trans (cpr, transid, aeskey) VALUES ('"+CPR.getText()+"','"+getTransID()+"','"+aesKeyBase64+"')");*/
 
 /*        // Encrypt AES Key
         String sql = ("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + CPR.getText()+"");
@@ -143,12 +176,6 @@ public class JournalMakerController implements Initializable
         // Action when the cancel button has been pressed should be written here.
         // get a handle to the stage
         System.exit(0);
-    }
-
-    private String getTransID()
-    {
-        UUID tempid = UUID.randomUUID();
-        return String.valueOf(tempid);
     }
 
     private void alertTextFieldNotFilled(JFXTextField textField)
@@ -217,6 +244,15 @@ public class JournalMakerController implements Initializable
         privateKey = privKey;
     }
 
+    public void passBlockId(String blockId)
+    {
+        journalBlockId = blockId;
+    }
+
+    public void passPatientPublicKey(String pubKey)
+    {
+        patientPublicKey = pubKey;
+    }
 }
 
 

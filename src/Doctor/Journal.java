@@ -131,7 +131,8 @@ public class Journal
                 + writtenBy + ":"
                 + authenticatedBy + ":"
                 + hospitalName + ":"
-                + departmentName + ":";
+                + departmentName + ":"
+                + uploadedBy;
     }
 
 

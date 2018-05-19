@@ -18,6 +18,7 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,8 @@ public class UserViewController implements Initializable
     private JFXButton deleteJournal;
 
     private PrivateKey privateKey;
+    private String patientPublicKey;
+    private List<Block> blockList;
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -68,7 +71,6 @@ public class UserViewController implements Initializable
     @FXML
     public void makeJournalButton(ActionEvent event)
     {
-
         try
         {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/Journalmaker.fxml"));
@@ -76,12 +78,19 @@ public class UserViewController implements Initializable
 
             JournalMakerController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
             controller.passPrivateKey(privateKey);
+            controller.passPatientPublicKey(patientPublicKey);
+
+            if (blockList.isEmpty())
+                controller.passBlockId(null);
+            else
+                controller.passBlockId(blockList.get(0).id);
 
             Stage stage = new Stage();
             stage.setTitle("Journal Maker");
             stage.setScene(new Scene(root1, 830, 600));
             stage.show();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -96,19 +105,24 @@ public class UserViewController implements Initializable
         System.out.println("clicked on " + list.getSelectionModel().getSelectedItem().getText());
     }
 
-    public void passBlockList(List<Block> blockList)
+    public void passBlockList(List<Block> blockListParam)
     {
-
-
         // A blockchain goes from oldest to newest, therefore reverse the list to get the latest journal at the top
-        Collections.reverse(blockList);
+        Collections.reverse(blockListParam);
 
-        for (Block block : blockList)
+        for (Block block : blockListParam)
             list.getItems().add(new Label(block.data));
+
+        blockList = blockListParam;
     }
 
     public void passPrivateKey(PrivateKey privKey)
     {
         privateKey = privKey;
+    }
+
+    public void passPatientPublicKey(String pubKey)
+    {
+        patientPublicKey = pubKey;
     }
 }
