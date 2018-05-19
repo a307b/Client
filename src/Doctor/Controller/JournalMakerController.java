@@ -19,12 +19,12 @@ import javafx.scene.layout.AnchorPane;
 import org.apache.commons.codec.binary.Base64;
 
 // Java Imports
+import javax.crypto.Cipher;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.Signature;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -104,11 +104,19 @@ public class JournalMakerController implements Initializable
         System.arraycopy(IV, 0, keyIV, key.length, IV.length);
         String aesKeyBase64 = Base64.encodeBase64String(keyIV);
 
+        PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(patientPublicKey)));
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.PUBLIC_KEY, publicKey);
+        byte[] encryptedAesKeyIV = cipher.doFinal(keyIV);
+
         // Encryption and decryption test
         System.out.println("AES Key : " + aesKeyBase64);
-        byte[] encryptedData = journal.encrypt(journal.toString(), aesKeyBase64);
-        String encryptedDataString = Base64.encodeBase64String(encryptedData);
-        String decryptedData = journal.decrypt(encryptedData, aesKeyBase64);
+        byte[] encryptedJournalData = journal.encrypt(journal.toString(), aesKeyBase64);
+
+
+
+        String encryptedDataString = Base64.encodeBase64String(encryptedJournalData);
+        String decryptedData = journal.decrypt(encryptedJournalData, aesKeyBase64);
         System.out.println("Decrypted : " + decryptedData);
 
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -119,56 +127,44 @@ public class JournalMakerController implements Initializable
         sig.initSign(privateKey);
 
         if (journalBlockId != null)
-            sig.update((journalBlockId+encryptedDataString).getBytes());
+            sig.update((journalBlockId+patientPublicKey).getBytes());
         else
-            sig.update(encryptedDataString.getBytes());
+            sig.update(patientPublicKey.getBytes());
 
-        byte[] signatureBytes = sig.sign();
-        System.out.println("Signature: " + Base64.encodeBase64String(signatureBytes));
+        byte[] signedBlock = sig.sign();
+        //System.out.println("Signature: " + Base64.encodeBase64String(signatureBytes));
 
 
         Socket socket = new Socket("127.0.0.1", 21149);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        System.out.println(patientPublicKey);
-
         // Send packet using opcode 1
-        /*bw.write(0);
+        bw.write(1);
 
-        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.write(Base64.encodeBase64String(signedBlock));
         bw.newLine();
 
-        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.write(patientPublicKey);
         bw.newLine();
 
-        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.write(Base64.encodeBase64String(encryptedAesKeyIV));
         bw.newLine();
 
-        bw.write(Base64.encodeBase64String(signatureBytes));
+        bw.write(Base64.encodeBase64String(encryptedJournalData));
         bw.newLine();
 
-        bw.flush();*/
+        bw.flush();
 
+        int success = br.read();
 
-
-        // Send to DB
-        /*Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
-        Statement stmt = con.createStatement();
-        stmt.executeUpdate("INSERT INTO trans (cpr, transid, aeskey) VALUES ('"+CPR.getText()+"','"+getTransID()+"','"+aesKeyBase64+"')");*/
-
-/*        // Encrypt AES Key
-        String sql = ("SELECT rsapublickey FROM BorgerDB WHERE cpr = " + CPR.getText()+"");
-        ResultSet rs = stmt.executeQuery(sql);
-        byte[] borgerPublicKey = rs.getBytes("rsapublickey");
-        System.out.println(borgerPublicKey.length);*/
-
-        // Blockchain Creation
-        // Blockchain blockchain = new Blockchain(transID, aesKeyBase64, encryptedData,"Public Key");
-        // blockchain.setCurrentHash(blockchain.generateHash(encryptedData));
-
-        // TODO implement send block
-        // blockchain.sendBlock();
+        if (success == 1)
+        {
+            String blockId = br.readLine();
+            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
+            Statement stmt = con.createStatement();
+            stmt.executeUpdate("INSERT INTO trans (blockid, aeskey) VALUES ('"+blockId+"','" + Base64.encodeBase64String(encryptedAesKeyIV) + "')");
+        }
     }
 
     public void cancelButtonAction(ActionEvent event)
