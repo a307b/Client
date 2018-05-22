@@ -8,9 +8,7 @@ import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.*;
 
 // Class used to generate and save keys. Private keys are stored in the privateKey directory and
 // public keys are uploaded to BorgerDB
@@ -48,15 +46,23 @@ public class RSAKeyGenerator {
             }
         }
         /* Uploads public key to database */
+        Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
-            Statement stmt = conn.createStatement();
-            String sqlInsert = "INSERT INTO `BorgerDB` (`cpr`, `rsapublickey`) VALUES ('"+ CPR +"', '" + publicKey +"')";
-            stmt.executeUpdate(sqlInsert);
-
-
-        }catch (java.sql.SQLException sqlException) {
-            sqlException.printStackTrace();
+            conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
+            String query = "INSERT INTO `BorgerDB` (`cpr`, `rsapublickey`) VALUES (?,?)";
+            pstmt = (PreparedStatement) conn.prepareStatement(query);
+            pstmt.setString(1, CPR);
+            pstmt.setBytes(2, publicKey);
+        }catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                pstmt.close();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

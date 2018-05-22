@@ -1,8 +1,6 @@
 package Doctor.Controller;
 
 // jFoenix Imports
-import Doctor.Block;
-import Doctor.Blockchain;
 import Doctor.Journal;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
@@ -14,25 +12,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import org.apache.commons.codec.binary.Base64;
+import supportClasses.AES;
 
 // Java Imports
-import javax.crypto.Cipher;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Collections;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.UUID;
 
 public class JournalMakerController implements Initializable
 {
@@ -88,7 +77,7 @@ public class JournalMakerController implements Initializable
     {
         checkIfEmptyField();
         // Action when the save button has been pressed should be written here.
-        Journal journal = new Journal(patientName.getText(), CPR.getText(), "", "Start Date", "End Date ",
+        Journal journal = new Journal(patientName.getText(), CPR.getText(), "Print Date", "Start Date", "End Date ",
                 " Date Written", noteType.getText(), examinationDetails.getText(), diagnose.getText(), interpretedBy.getText(),
                 writtenBy.getText(), authenticatedBy.getText(), hospitalName.getText(), departmentName.getText(), uploadedBy.getText());
         System.out.println(journal.toString());
@@ -103,24 +92,26 @@ public class JournalMakerController implements Initializable
         System.arraycopy(key, 0, keyIV, 0, key.length);
         System.arraycopy(IV, 0, keyIV, key.length, IV.length);
         String aesKeyBase64 = Base64.encodeBase64String(keyIV);
-
+/*
         PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(patientPublicKey)));
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.PUBLIC_KEY, publicKey);
         byte[] encryptedAesKeyIV = cipher.doFinal(keyIV);
+*/
 
         // Encryption and decryption test
+        AES AES = new AES();
         System.out.println("AES Key : " + aesKeyBase64);
-        byte[] encryptedJournalData = journal.encrypt(journal.toString(), aesKeyBase64);
+        byte[] encryptedJournalData = AES.encrypt(journal.toString(), aesKeyBase64);
 
 
 
         String encryptedDataString = Base64.encodeBase64String(encryptedJournalData);
-        String decryptedData = journal.decrypt(encryptedJournalData, aesKeyBase64);
+        String decryptedData = AES.decrypt(encryptedJournalData, aesKeyBase64);
         System.out.println("Decrypted : " + decryptedData);
 
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-        // Send to blockchain, if succesful we add it to DB
+        // Send to blockchain, if successful we add it to DB
 
 
         Signature sig = Signature.getInstance("SHA256WithRSA");
@@ -136,36 +127,61 @@ public class JournalMakerController implements Initializable
 
 
         Socket socket = new Socket("127.0.0.1", 21149);
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         // Send packet using opcode 1
-        bw.write(1);
+        bufferedWriter.write(1);
 
-        bw.write(Base64.encodeBase64String(signedBlock));
-        bw.newLine();
+        bufferedWriter.write(Base64.encodeBase64String(signedBlock));
+        bufferedWriter.newLine();
 
-        bw.write(patientPublicKey);
-        bw.newLine();
+        bufferedWriter.write(patientPublicKey);
+        bufferedWriter.newLine();
 
-        bw.write(Base64.encodeBase64String(encryptedAesKeyIV));
-        bw.newLine();
+        //bufferedWriter.write(Base64.encodeBase64String(encryptedAesKeyIV));
+        bufferedWriter.write(aesKeyBase64);
+        bufferedWriter.newLine();
 
-        bw.write(Base64.encodeBase64String(encryptedJournalData));
-        bw.newLine();
+        bufferedWriter.write(Base64.encodeBase64String(encryptedJournalData));
+        bufferedWriter.newLine();
 
-        bw.flush();
+        bufferedWriter.flush();
 
-        int success = br.read();
+        //int success = bufferedReader.read();   DENNE LINJE FOR CLIENT TIL AT KRASHE EFTER CREATION
+        // success == 1
 
-        if (success == 1)
-        {
-            String blockId = br.readLine();
-            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
-            Statement stmt = con.createStatement();
-            stmt.executeUpdate("INSERT INTO trans (blockid, aeskey) VALUES ('"+blockId+"','" + Base64.encodeBase64String(encryptedAesKeyIV) + "')");
-        }
-    }
+//        if (true)
+//        {
+//            String blockId = bufferedReader.readLine();
+//            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
+//            Statement stmt = con.createStatement();
+//            stmt.executeUpdate("INSERT INTO trans (blockid, aeskey) VALUES ('"+blockId+"','" + "LOL" + /* Base64.encodeBase64String(encryptedAesKeyIV) */ "')");
+
+//            /* I ENDELIG LØSNING SKAL DEN RSA KRYPTERES FØR DEN UPLOADES */
+//            /* Uploads AES key to database */
+//            Connection conn = null;
+//            PreparedStatement pstmt = null;
+//            try {
+ //               conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
+ //               String query = "INSERT INTO `trans` (`blockid`, `aeskey`) VALUES (?,?)";
+   //             pstmt = (PreparedStatement) conn.prepareStatement(query);
+     //           pstmt.setString(1, journalBlockId);
+       //         pstmt.setString(2, aesKeyBase64);
+         //   }catch (java.sql.SQLException e) {
+//                e.printStackTrace();
+  //          }finally {
+    //            try {
+      //              pstmt.close();
+        //            conn.close();
+//          //      } catch (SQLException e) {
+//                  e.printStackTrace();
+//              }
+//          }
+//
+//        }
+
+     }
 
     public void cancelButtonAction(ActionEvent event)
     {

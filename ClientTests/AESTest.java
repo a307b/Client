@@ -2,12 +2,13 @@ import Doctor.Journal;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import supportClasses.AES;
 
 import java.security.SecureRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JournalTest {
+class AESTest {
     Journal journal;
 
     @BeforeEach
@@ -34,8 +35,11 @@ class JournalTest {
             String aesKeyBase64 = Base64.encodeBase64String(keyIV);
 
             // Encryption and decryption
-            byte[] encryptedData = journal.encrypt(journal.toString(), aesKeyBase64);
-            String decryptedData = journal.decrypt(encryptedData, aesKeyBase64);
+            AES AES = new AES();
+            byte[] encryptedData = AES.encrypt(journal.toString(), aesKeyBase64);
+            String encodedEncryptedData = Base64.encodeBase64String(encryptedData);
+
+            String decryptedData = AES.decrypt(Base64.decodeBase64(encodedEncryptedData), aesKeyBase64);
             assertEquals(journal.toString(), decryptedData);
         }
         catch (Exception e){

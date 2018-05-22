@@ -15,19 +15,15 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -140,22 +136,24 @@ public class UserSearchController implements Initializable
             try
             {
                 Socket socket = new Socket("127.0.0.1", 21149);
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                 // Send packet using opcode 0
-                bw.write(0);
-                bw.write(publicKey); // Send the public key to the blockchain
-                bw.newLine();
-                bw.flush();
+                bufferedWriter.write(0);
+                bufferedWriter.write(publicKey); // Send the public key to the blockchain
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
 
                 // Read count of blocks
-                int count = br.read();
+                int count = bufferedReader.read();
                 for (int i = 0; i < count; ++i)
                 {
                     Block block = new Block();
-                    block.id = br.readLine();
-                    block.data = br.readLine();
+                    block.id = bufferedReader.readLine();
+                    block.publicKey = bufferedReader.readLine();
+                    block.encryptedAESKey = bufferedReader.readLine();
+                    block.encryptedData = bufferedReader.readLine();
 
                     blockList.add(block);
                 }
@@ -170,10 +168,10 @@ public class UserSearchController implements Initializable
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
                 Parent root1 = fxmlLoader.load();
 
-                UserViewController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
-                controller.passBlockList(blockList);
-                controller.passPrivateKey(privateKey);
-                controller.passPatientPublicKey(publicKey);
+                UserViewController userViewController = fxmlLoader.getController(); // Pass params to PatientViewController using method
+                userViewController.passBlockList(blockList);
+                userViewController.passPrivateKey(privateKey);
+                userViewController.passPatientPublicKey(publicKey);
 
 
                 Stage stage = new Stage();
