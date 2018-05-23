@@ -13,7 +13,6 @@ import java.sql.*;
 
 public class AES {
     /**
-     * HAS TO BE ALTERED!!! -
      * COPY PASTE FROM https://gist.github.com/itarato/abef95871756970a9dad
      * ALL CREDITS TO : https://gist.github.com/itarato/abef95871756970a9dad
      */
@@ -48,7 +47,6 @@ public class AES {
     }
 
     /**
-     * HAS TO BE ALTERED!!! -
      * COPY PASTE FROM https://gist.github.com/itarato/abef95871756970a9dad
      * ALL CREDITS TO : https://gist.github.com/itarato/abef95871756970a9dad
      */
@@ -116,12 +114,9 @@ public class AES {
             PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(queryPublicKey));
             /* Encrypts the key */
             encryptedAESKey = RSA.encrypt(AESKey, publicKey);
-            //System.out.println("AES key before encryption: " + AESKey);
-            //System.out.println("Encrypted AES-Key: " + encryptedAESKey);
         }catch (Exception e){
             e.printStackTrace();
         }
-        //System.out.println("Returned encrypted key: " + encryptedAESKey);
         return encryptedAESKey;
     }
 

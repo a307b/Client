@@ -7,7 +7,7 @@ class JournalGeneratorTest {
     @Test
     void makeJournal() {
         JournalGenerator journalGenerator = new JournalGenerator();
-        journalGenerator.makeJournal("Bob", "1234567890", "21.3.2018","10.3.2018", "20.3.2018", "19.3.2018", "Røntgennote",
+        journalGenerator.makeJournal("makeJournalTest", "Bob", "1234567890", "21.3.2018","10.3.2018", "20.3.2018", "19.3.2018", "Røntgennote",
                 "Undersøgelsen er foretaget som postoperativ kontrol.\n" +
                         "Der ses sammenholdt medundersøgelsen fra29.07.17, at den tidligere\n" +
                         "påviste fraktur vedproksimalehøjre femur, nu er behandlet med total\n" +

@@ -55,12 +55,6 @@ public class UserViewController implements Initializable
     }
 
     @FXML
-    public void deleteJournalButton(ActionEvent event)
-    {
-
-    }
-
-    @FXML
     public void getJournalButton(ActionEvent event)
     {
         try{
@@ -73,10 +67,10 @@ public class UserViewController implements Initializable
                 System.out.println(retrievedJournal);
                 /* Splits lines separated by semicolon */
                 List<String> splitLinesList = Arrays.asList(retrievedJournal.split(":"));
-                System.out.println("It reaches here and the list is so long: " + splitLinesList.size());
-                // TJEK OM DER ER LIGE SÅ MANGE VARIABLER som der skal være
+                /* The name of the saved file is the 10 first characters of the encrypted journal. */
+                String saveFileName = blockList.get(getClickedJournal()).encryptedData.substring(0, 10);
                 /* Inserts all the variables in JournalGenerator */
-                journalGenerator.makeJournal(splitLinesList.get(0), splitLinesList.get(1), splitLinesList.get(2), splitLinesList.get(3),
+                journalGenerator.makeJournal(saveFileName, splitLinesList.get(0), splitLinesList.get(1), splitLinesList.get(2), splitLinesList.get(3),
                         splitLinesList.get(4), splitLinesList.get(5), splitLinesList.get(6), splitLinesList.get(7),
                         splitLinesList.get(8), splitLinesList.get(9), splitLinesList.get(10), splitLinesList.get(11),
                         splitLinesList.get(12), splitLinesList.get(13), splitLinesList.get(14));
@@ -102,6 +96,7 @@ public class UserViewController implements Initializable
             journalMakerController.passPublicKey(publicKey);
             journalMakerController.passPatientPublicKey(publicKeyAsString);
 
+            /* If the blockList for the user is not empty, pass the most recent block's ID. */
             if (blockList.isEmpty())
                 journalMakerController.passBlockId(null);
             else
@@ -121,7 +116,6 @@ public class UserViewController implements Initializable
     @FXML
     public void handleMouseClick(MouseEvent mouseEvent)
     {
-        //System.out.println("clicked on " + jfxViewList.getSelectionModel().getSelectedItem().getText());
         /* If any element that is not white space (-1) is clicked save the index of that element in clickedJournal */
         if(jfxViewList.getSelectionModel().getSelectedIndex() != -1) {
             setClickedJournal(jfxViewList.getSelectionModel().getSelectedIndex());

@@ -15,12 +15,12 @@
     <children>
         <JFXTextField fx:id="patientName" focusColor="#2c3e50" labelFloat="true" layoutX="30.0" layoutY="55.0" prefHeight="30.0" prefWidth="180.0" promptText="Patient Navn" />
         <JFXTextField fx:id="CPR" focusColor="#2c3e50" labelFloat="true" layoutX="230.0" layoutY="55.0" prefHeight="30.0" prefWidth="180.0" promptText="CPR" />
-        <JFXDatePicker fx:id="printDate" defaultColor="#2c3e50" layoutX="430.0" layoutY="57.0" promptText="Udskrivnings Dato" />
+        <JFXTextField fx:id="printDate" focusColor="#2c3e50" labelFloat="true" layoutX="430.0" layoutY="57.0" prefHeight="30.0" prefWidth="180.0" promptText="Udskrivnings Dato" />
         <Label layoutX="30.0" layoutY="24.0" text="Personlig Oplysninger" />
         <Label layoutX="30.0" layoutY="101.0" text="Behandlings oplysninger" />
-        <JFXDatePicker fx:id="startTDate" defaultColor="#2c3e50" layoutX="30.0" layoutY="132.0" promptText="Starts Dato" />
-        <JFXDatePicker fx:id="endTDate" defaultColor="#2c3e50" layoutX="230.0" layoutY="132.0"  promptText="Slutnings Dato" />
-        <JFXDatePicker fx:id="dateWritten" defaultColor="#2c3e50" layoutX="430.0" layoutY="132.0" promptText="Data udarbejdet d." />
+        <JFXTextField fx:id="startTDate" focusColor="#2c3e50" layoutX="30.0" layoutY="132.0" prefHeight="30.0" prefWidth="180.0" promptText="Starts Dato" />
+        <JFXTextField fx:id="endTDate" focusColor="#2c3e50" layoutX="230.0" layoutY="132.0" prefHeight="30.0" prefWidth="180.0"  promptText="Slutnings Dato" />
+        <JFXTextField fx:id="dateWritten" focusColor="#2c3e50" layoutX="430.0" layoutY="132.0" prefHeight="30.0" prefWidth="180.0" promptText="Data udarbejdet d." />
         <JFXTextField fx:id="noteType" focusColor="#2c3e50" labelFloat="true" layoutX="630.0" layoutY="131.0" prefHeight="30.0" prefWidth="180.0" promptText="Note Type" />
         <JFXTextArea fx:id="examinationDetails" focusColor="#2c3e50" layoutX="30.0" layoutY="190.0" prefHeight="198.0" prefWidth="782.0" promptText="Undersøgelsesdetaljer" />
         <JFXTextField fx:id="diagnose" focusColor="#2c3e50" labelFloat="true" layoutX="30.0" layoutY="421.0" prefHeight="30.0" prefWidth="180.0" promptText="diagnosticeret" />

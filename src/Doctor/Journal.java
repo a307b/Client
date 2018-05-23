@@ -1,13 +1,5 @@
 package Doctor;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-
 public class Journal
 {
     private String patientName;
@@ -44,26 +36,6 @@ public class Journal
         this.departmentName = departmentName;
         this.uploadedBy = uploadedBy;
     }
-
-    public Journal(String encryptedJournal)
-    {
-        this.patientName = patientName;
-        this.CPR = CPR;
-        this.printDate = printDate;
-        this.startTDate = startTDate;
-        this.endTDate = endTDate;
-        this.dateWritten = dateWritten;
-        this.noteType = noteType;
-        this.examinationDetails = examinationDetails;
-        this.diagnose = diagnose;
-        this.interpretedBy = interpretedBy;
-        this.writtenBy = writtenBy;
-        this.authenticatedBy = authenticatedBy;
-        this.hospitalName = hospitalName;
-        this.departmentName = departmentName;
-        this.uploadedBy = uploadedBy;
-    }
-
 
     @Override
     public String toString()

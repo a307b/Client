@@ -32,9 +32,6 @@ public class RSA {
         String publicKeyString = Base64.encodeBase64String(keyPair.getPublic().getEncoded());
         String privateKeyString = Base64.encodeBase64String(keyPair.getPrivate().getEncoded());
 
-
-
-
         /* Saves private-key locally to privateKeys directory */
         Path filePath = Paths.get("C:\\GitHub\\Patient\\src\\privateKeys\\" + CPR + ".txt");
         BufferedWriter bufferedWriter = null;

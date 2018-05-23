@@ -4,9 +4,6 @@ import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.layout.element.Text;
 
-// Query variables are converted to the Text objects needed to form the necessary paragraphs.
-// To use formatting in Itext7 strings need to become text objects before they are used in paragraphs.
-
 public class TextVariables {
     private PdfFont bold;
 
@@ -33,13 +30,11 @@ public class TextVariables {
     private Text departmentNameBold;
     private Text departmentName;
 
-    //I have initialized the variables in a constructor contrary to the other variable classes
-    //since i need to handle the exception created by createFont(StandardFonts.TIMES_BOLD),
-    //and you cannot handle exception when you make variables in a class directly
     public TextVariables(QueryVariables queryVariables) {
         try {
             bold = PdfFontFactory.createFont(StandardFonts.TIMES_BOLD);
 
+            /* Text objects for the header */
             patientNameBold = new Text("Notater for:\n").setFont(bold);
             patientName = new Text(queryVariables.getPatientName());
 

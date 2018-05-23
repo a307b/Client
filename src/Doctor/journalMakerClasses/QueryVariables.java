@@ -20,18 +20,6 @@ public class QueryVariables {
     private String departmentName;
     private String uploadedBy;
 
-    /* Input to constructor for old example */
-    /*
-    "Bob", "1234567890", "21.3.2018","10.3.2018", "20.3.2018", "19.3.2018", "Røntgennote",
-            "Undersøgelsen er foretaget som postoperativ kontrol.\n" +
-            "Der ses sammenholdt medundersøgelsen fra29.07.17, at den tidligere\n" +
-            "påviste fraktur vedproksimalehøjre femur, nu er behandlet med total\n" +
-            "hoftealloplastik, som ses i god stilling i alle planer", "postoperativ kontrol",
-            "Anders Bensen", "Ib Jensen", "Dennis Krieger", "Aalborg Universitetshospital",
-            "Alb Røntgen Amb", "Alb O-kir sengeafdeling"
-    */
-
-
     public QueryVariables(String patientName, String CPR, String printDate, String startTDate, String endTDate,
                           String dateWritten, String noteType, String examinationDetails, String diagnose, String interpretedBy,
                           String writtenBy, String authenticatedBy, String hospitalName, String departmentName, String uploadedBy) {

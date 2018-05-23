@@ -1,6 +1,5 @@
 package Doctor.Controller;
 
-// jFoenix Imports
 import Doctor.Journal;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
@@ -33,13 +32,13 @@ public class JournalMakerController implements Initializable
     @FXML
     private JFXTextField CPR;
     @FXML
-    private JFXDatePicker printDate;
+    private JFXTextField printDate;
     @FXML
-    private JFXDatePicker startTDate;
+    private JFXTextField startTDate;
     @FXML
-    private JFXDatePicker endTDate;
+    private JFXTextField endTDate;
     @FXML
-    private JFXDatePicker dateWritten;
+    private JFXTextField dateWritten;
     @FXML
     private JFXTextField noteType;
     @FXML
@@ -71,16 +70,14 @@ public class JournalMakerController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        //Initialize
-
     }
 
     public void saveButtonAction(ActionEvent event) throws Exception
     {
         checkIfEmptyField();
         // Action when the save button has been pressed should be written here.
-        Journal journal = new Journal(patientName.getText(), CPR.getText(), "Print Date", "Start Date", "End Date ",
-                " Date Written", noteType.getText(), examinationDetails.getText(), diagnose.getText(), interpretedBy.getText(),
+        Journal journal = new Journal(patientName.getText(), CPR.getText(), printDate.getText(), startTDate.getText(), endTDate.getText(),
+                dateWritten.getText(), noteType.getText(), examinationDetails.getText(), diagnose.getText(), interpretedBy.getText(),
                 writtenBy.getText(), authenticatedBy.getText(), hospitalName.getText(), departmentName.getText(), uploadedBy.getText());
         System.out.println(journal.toString());
 
@@ -109,25 +106,23 @@ public class JournalMakerController implements Initializable
 
 
 
-        // Send to blockchain, if successful we add it to DB
+        /* If there existed no blocks in the patients blockList prior to this, the blockID is the patients SHA256-hashed public key.
+           If there did exist an block the blockID is the previous block id + the patients public key, hashed with SHA256. */
         Signature sig = Signature.getInstance("SHA256WithRSA");
         sig.initSign(privateKey);
-
-        if (journalBlockId != null)
-            sig.update((journalBlockId+patientPublicKey).getBytes());
-        else
+        if (journalBlockId == null)
             sig.update(patientPublicKey.getBytes());
+        else
+            sig.update((journalBlockId+patientPublicKey).getBytes());
 
         byte[] signedBlock = sig.sign();
         String signedBlockAsString = Base64.encodeBase64String(signedBlock);
-        //System.out.println("Signature: " + Base64.encodeBase64String(signatureBytes));
 
         /* Uploads AES-key to database */
         AES.saveAESToDB(signedBlockAsString, aesKeyBase64);
 
         Socket socket = new Socket("127.0.0.1", 21149);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         // Send packet using opcode 1
         bufferedWriter.write(1);
@@ -138,7 +133,6 @@ public class JournalMakerController implements Initializable
         bufferedWriter.write(patientPublicKey);
         bufferedWriter.newLine();
 
-        //bufferedWriter.write(Base64.encodeBase64String(encryptedAesKeyIV));
         bufferedWriter.write(encryptedAESKeyString);
         bufferedWriter.newLine();
 
@@ -170,16 +164,6 @@ public class JournalMakerController implements Initializable
         alert.setTitle("Journal Creation Error");
         alert.setHeaderText("There has been an error creating a journal!");
         alert.setContentText("You can not leave " + textArea.getId() + " empty!  ");
-        alert.show();
-    }
-
-    // to be implemented
-    private void alertDateFieldNotFilled(JFXDatePicker datePicker)
-    {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Journal Creation Error");
-        alert.setHeaderText("There has been an error creating a journal!");
-        alert.setContentText("You can not leave " + datePicker.getId() + " empty! ");
         alert.show();
     }
 

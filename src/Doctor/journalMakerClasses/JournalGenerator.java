@@ -1,8 +1,5 @@
 package Doctor.journalMakerClasses;
 
-import Doctor.journalMakerClasses.ParagraphVariables;
-import Doctor.journalMakerClasses.QueryVariables;
-import Doctor.journalMakerClasses.TextVariables;
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -11,24 +8,23 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
 
+import java.io.File;
 import java.util.ArrayList;
-
-// Data transfer objects DTO er den type klasser jeg har lavet som kun har variable
-// De bliver beskrevet på clean code side 100 (131 PDF) og formen der har private variabler
-// og getters istedet for public variabler uden getters kaldes bean form.
-// Han siger det er en form som gør Objectiv purister glade, men ellers ikke hjælper på
-// noget så burde vi fjerne gettersene? På den ene side gør de filerne sikre siden vi
-// arbejder med sygehusvæsenet, men hvis getters ikke er nødvendige er de spild af kode
 
 public class JournalGenerator
 {
-    public void makeJournal(String patientName, String CPR, String printDate, String startTDate, String endTDate,
+    public void makeJournal(String saveLocation, String patientName, String CPR, String printDate, String startTDate, String endTDate,
                      String dateWritten, String noteType, String examinationDetails, String diagnose, String interpretedBy,
                      String writtenBy, String authenticatedBy, String hospitalName, String departmentName, String uploadedBy)  {
         try {
             // PDF save location
-            final String savePath = "C:\\Journal\\FremstilletPDF.pdf";
+            final String savePath = "C:\\Journal\\" + saveLocation +".pdf";
 
+            /* Creates directory if it does not exist */
+            File file = new File("C:\\Journal");
+            if(!file.exists()) {
+                file.mkdirs();
+            }
             // Initialize PDF document
             PdfDocument pdf = new PdfDocument(new PdfWriter(savePath));
 
