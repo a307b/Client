@@ -84,6 +84,9 @@ public class JournalMakerController implements Initializable
                 writtenBy.getText(), authenticatedBy.getText(), hospitalName.getText(), departmentName.getText(), uploadedBy.getText());
         System.out.println(journal.toString());
 
+        RSA RSA = new RSA();
+        AES AES = new AES();
+
         /* Creates AES key with salt */
         SecureRandom random = new SecureRandom();
         byte key[] = new byte[32]; // 256 bits
@@ -95,17 +98,7 @@ public class JournalMakerController implements Initializable
         System.arraycopy(IV, 0, keyIV, key.length, IV.length);
         String aesKeyBase64 = Base64.encodeBase64String(keyIV);
 
-
-/*
-        PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(patientPublicKey)));
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.PUBLIC_KEY, publicKey);
-        byte[] encryptedAesKeyIV = cipher.doFinal(keyIV);
-*/
-
         /* Encrypts journalData */
-        RSA RSA = new RSA();
-        AES AES = new AES();
         byte[] encryptedJournalData = AES.encrypt(journal.toString(), aesKeyBase64);
         String encryptedJournalDataString = Base64.encodeBase64String(encryptedJournalData);
 
@@ -126,8 +119,11 @@ public class JournalMakerController implements Initializable
             sig.update(patientPublicKey.getBytes());
 
         byte[] signedBlock = sig.sign();
+        String signedBlockAsString = Base64.encodeBase64String(signedBlock);
         //System.out.println("Signature: " + Base64.encodeBase64String(signatureBytes));
 
+        /* Uploads AES-key to database */
+        AES.saveAESToDB(signedBlockAsString, aesKeyBase64);
 
         Socket socket = new Socket("127.0.0.1", 21149);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -136,7 +132,7 @@ public class JournalMakerController implements Initializable
         // Send packet using opcode 1
         bufferedWriter.write(1);
         /* sends unique block ID, which is the signed private key */
-        bufferedWriter.write(Base64.encodeBase64String(signedBlock));
+        bufferedWriter.write(signedBlockAsString);
         bufferedWriter.newLine();
 
         bufferedWriter.write(patientPublicKey);
@@ -150,40 +146,6 @@ public class JournalMakerController implements Initializable
         bufferedWriter.newLine();
 
         bufferedWriter.flush();
-
-        //int success = bufferedReader.read();   DENNE LINJE FOR CLIENT TIL AT KRASHE EFTER CREATION
-        // success == 1
-
-//        if (true)
-//        {
-//            String blockId = bufferedReader.readLine();
-//            Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
-//            Statement stmt = con.createStatement();
-//            stmt.executeUpdate("INSERT INTO trans (blockid, aeskey) VALUES ('"+blockId+"','" + "LOL" + /* Base64.encodeBase64String(encryptedAesKeyIV) */ "')");
-
-//            /* I ENDELIG LØSNING SKAL DEN RSA KRYPTERES FØR DEN UPLOADES */
-//            /* Uploads AES key to database */
-//            Connection conn = null;
-//            PreparedStatement pstmt = null;
-//            try {
- //               conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
- //               String query = "INSERT INTO `trans` (`blockid`, `aeskey`) VALUES (?,?)";
-   //             pstmt = (PreparedStatement) conn.prepareStatement(query);
-     //           pstmt.setString(1, journalBlockId);
-       //         pstmt.setString(2, aesKeyBase64);
-         //   }catch (java.sql.SQLException e) {
-//                e.printStackTrace();
-  //          }finally {
-    //            try {
-      //              pstmt.close();
-        //            conn.close();
-//          //      } catch (SQLException e) {
-//                  e.printStackTrace();
-//              }
-//          }
-//
-//        }
-
      }
 
     public void cancelButtonAction(ActionEvent event)

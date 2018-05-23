@@ -96,6 +96,8 @@ class AESTest {
     @Test
     void AESToAndFromDBTest() {
         AES AES = new AES();
-        AES.getAESFromDB("EQhLRx6LnBJjlOYWDdBxASQHnG5FN+Z1fMJEKnd1MSE=");
+        //AES.saveAESToDB("123", "123");
+        //String test = AES.getAESFromDB("123");
+        String test2 = AES.getAESFromDB("8853526b4205d742137ea25a6c0ee7f58bcf40ab5f3a18872892394207b48635");
     }
 }

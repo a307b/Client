@@ -150,28 +150,20 @@ public class AES {
 
     public String getAESFromDB(String blockID) {
         /* Retrieves AES key from database */
-        Connection conn = null;
-        PreparedStatement pstmt = null;
         try {
+            /* Connects to database, reads the rsapublickey from the entry where CPR is 0011223344 */
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
             Statement stmt = conn.createStatement();
-            //"SELECT cpr, rsapublickey FROM borger WHERE cpr = 0011223344"
-            String query = "SELECT blockid, aeskey FROM trans WHERE blockid = EQhLRx6LnBJjlOYWDdBxASQHnG5FN+Z1fMJEKnd1MSE=";
+            String query = "SELECT * FROM `trans` WHERE `blockid` = \""+ blockID +"\";";
             ResultSet rs = stmt.executeQuery(query);
             rs.next();
             String AESKey =  rs.getString("aeskey");
-            pstmt.execute();
+            stmt.close();
+            conn.close();
             return AESKey;
         }catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            try {
-                pstmt.close();
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }

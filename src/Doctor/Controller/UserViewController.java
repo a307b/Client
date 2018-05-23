@@ -68,7 +68,8 @@ public class UserViewController implements Initializable
             JournalGenerator journalGenerator = new JournalGenerator();
             AES AES = new AES();
             if(aJournalHasBeenClicked) {
-                String retrievedJournal = AES.decrypt(Base64.decodeBase64(blockList.get(getClickedJournal()).encryptedData), blockList.get(getClickedJournal()).encryptedAESKey);
+                String AESKeyFromDB = AES.getAESFromDB(blockList.get(getClickedJournal()).id);
+                String retrievedJournal = AES.decrypt(Base64.decodeBase64(blockList.get(getClickedJournal()).encryptedData), AESKeyFromDB);
                 System.out.println(retrievedJournal);
                 /* Splits lines separated by semicolon */
                 List<String> splitLinesList = Arrays.asList(retrievedJournal.split(":"));
