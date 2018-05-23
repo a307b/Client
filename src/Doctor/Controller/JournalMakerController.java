@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import org.apache.commons.codec.binary.Base64;
 import supportClasses.AES;
+import supportClasses.RSA;
 
 // Java Imports
 import java.io.*;
@@ -63,6 +64,7 @@ public class JournalMakerController implements Initializable
     private JFXButton cancel;
 
     private PrivateKey privateKey;
+    private PublicKey publicKey;
     private String patientPublicKey;
     private String journalBlockId;
 
@@ -82,7 +84,7 @@ public class JournalMakerController implements Initializable
                 writtenBy.getText(), authenticatedBy.getText(), hospitalName.getText(), departmentName.getText(), uploadedBy.getText());
         System.out.println(journal.toString());
 
-        // AES Key Generation prep stuff
+        /* Creates AES key with salt */
         SecureRandom random = new SecureRandom();
         byte key[] = new byte[32]; // 256 bits
         random.nextBytes(key);
@@ -92,6 +94,8 @@ public class JournalMakerController implements Initializable
         System.arraycopy(key, 0, keyIV, 0, key.length);
         System.arraycopy(IV, 0, keyIV, key.length, IV.length);
         String aesKeyBase64 = Base64.encodeBase64String(keyIV);
+
+
 /*
         PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(patientPublicKey)));
         Cipher cipher = Cipher.getInstance("RSA");
@@ -99,21 +103,20 @@ public class JournalMakerController implements Initializable
         byte[] encryptedAesKeyIV = cipher.doFinal(keyIV);
 */
 
-        // Encryption and decryption test
+        /* Encrypts journalData */
+        RSA RSA = new RSA();
         AES AES = new AES();
-        System.out.println("AES Key : " + aesKeyBase64);
         byte[] encryptedJournalData = AES.encrypt(journal.toString(), aesKeyBase64);
+        String encryptedJournalDataString = Base64.encodeBase64String(encryptedJournalData);
+
+        /* Encrypts AES-key */
+        byte[] encryptedAESKey = RSA.encrypt(aesKeyBase64, publicKey);
+        String encryptedAESKeyString = Base64.encodeBase64String(encryptedAESKey);
 
 
 
-        String encryptedDataString = Base64.encodeBase64String(encryptedJournalData);
-        String decryptedData = AES.decrypt(encryptedJournalData, aesKeyBase64);
-        System.out.println("Decrypted : " + decryptedData);
 
-        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
         // Send to blockchain, if successful we add it to DB
-
-
         Signature sig = Signature.getInstance("SHA256WithRSA");
         sig.initSign(privateKey);
 
@@ -132,7 +135,7 @@ public class JournalMakerController implements Initializable
 
         // Send packet using opcode 1
         bufferedWriter.write(1);
-
+        /* sends unique block ID, which is the signed private key */
         bufferedWriter.write(Base64.encodeBase64String(signedBlock));
         bufferedWriter.newLine();
 
@@ -140,10 +143,10 @@ public class JournalMakerController implements Initializable
         bufferedWriter.newLine();
 
         //bufferedWriter.write(Base64.encodeBase64String(encryptedAesKeyIV));
-        bufferedWriter.write(aesKeyBase64);
+        bufferedWriter.write(encryptedAESKeyString);
         bufferedWriter.newLine();
 
-        bufferedWriter.write(Base64.encodeBase64String(encryptedJournalData));
+        bufferedWriter.write(encryptedJournalDataString);
         bufferedWriter.newLine();
 
         bufferedWriter.flush();
@@ -264,6 +267,10 @@ public class JournalMakerController implements Initializable
     public void passPatientPublicKey(String pubKey)
     {
         patientPublicKey = pubKey;
+    }
+
+    public void passPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 }
 

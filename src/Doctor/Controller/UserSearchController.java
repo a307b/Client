@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -26,17 +27,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 public class UserSearchController implements Initializable
 {
-    //PrivateKey privateKey;
-    String privateKeyLocation = "src/Doctor/privatekey";
-    String publicKeyLocation = "src/Doctor/publickey";
-
     PrivateKey privateKey;
+    /* The public key is needed as both an String and publicKey throughout the program. To avoid unnecessary typecasting
+     * which if done carelessly might result in padding-errors, there exist an variable for both. */
     PublicKey publicKey;
-    String patientPublicKeyString;
+    String publicKeyAsString;
 
     @FXML
     private JFXTextField cprTextField;
@@ -44,47 +44,6 @@ public class UserSearchController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        try
-        {
-            File privateKeyFile = new File(privateKeyLocation);
-            File publicKeyFile = new File(publicKeyLocation);
-
-            if(!privateKeyFile.exists() || !publicKeyFile.exists())
-            {
-                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                keyGen.initialize(1024);
-                KeyPair keyPair = keyGen.genKeyPair();
-                privateKey = keyPair.getPrivate();
-                publicKey = keyPair.getPublic();
-
-                // Get the bytes of the private key
-                byte[] privateKeyBytes = privateKey.getEncoded();
-                byte[] publicKeyBytes = publicKey.getEncoded();
-
-                PrintWriter privateKeyWriter = new PrintWriter (privateKeyLocation);
-                privateKeyWriter.println(Base64.encodeBase64String(privateKeyBytes));
-                privateKeyWriter.close();
-
-                PrintWriter publicKeyWriter = new PrintWriter (publicKeyLocation);
-                publicKeyWriter.println(Base64.encodeBase64String(publicKeyBytes));
-                publicKeyWriter.close();
-            }
-            else
-            {
-                byte[] keyBytes = Base64.decodeBase64(Files.readAllBytes(Paths.get(privateKeyLocation)));
-
-                PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-
-                privateKey = keyFactory.generatePrivate(spec);
-            }
-
-        }
-
-        catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
 
     }
 
@@ -118,34 +77,58 @@ public class UserSearchController implements Initializable
         }
 
         List<Block> blockList = new ArrayList<>();
-
         try
         {
+            /* Connects to database */
             Connection con = DriverManager.getConnection("jdbc:mysql://195.201.113.131:3306/p2?autoReconnect=true&useSSL=false","sembrik","lol123"); // p2 is db name
             Statement stmt = con.createStatement();
+            /* Searches for public key that match entered cpr */
             ResultSet rs = stmt.executeQuery("SELECT rsapublickey FROM borger WHERE cpr = " + cprString);
-
+            /* If no match is found throw error message */
             if (!rs.next())
             {
                 System.out.println("Could not find user with following CPR-number: " + cprString);
                 return;
             }
 
-            String publicKey = rs.getString("rsapublickey");
+            /* Reads public key from database */
+            byte[] publicKeyBytes =  rs.getBytes("rsapublickey");
+            publicKeyAsString = rs.getString("rsapublickey");
+
+            /* Converts the retrieved public key to an public key */
+            byte[] decodedPublicKey = Base64.decodeBase64(publicKeyBytes);
+            publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPublicKey));
+
+
+            /* Reads and save the private key of the entered CPR */
+            try {
+                /* Retrieves privateKey string from local file and converts it into an private key */
+                BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get("C:\\GitHub\\Patient\\src\\privateKeys\\"+ cprString +".txt")));
+                /* Saves the content of the file in privateKeyString */
+                String privateKeyString = bufferedReader.lines().collect(Collectors.joining());
+                System.out.println(privateKeyString);
+                byte[] decodedPrivateKey = Base64.decodeBase64(privateKeyString);
+                privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedPrivateKey));
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
 
             try
             {
+                /* Connects to blockchain */
                 Socket socket = new Socket("127.0.0.1", 21149);
                 BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                // Send packet using opcode 0
+                /* First sends 0 to the blockchain to activate case 0 in the switch.
+                 * Afterwards sends the public key to search for existing blocks of that cpr. */
+
                 bufferedWriter.write(0);
-                bufferedWriter.write(publicKey); // Send the public key to the blockchain
+                bufferedWriter.write(publicKeyAsString);
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
 
-                // Read count of blocks
+                /* Reads received blocks and adds them to blockList */
                 int count = bufferedReader.read();
                 for (int i = 0; i < count; ++i)
                 {
@@ -162,16 +145,18 @@ public class UserSearchController implements Initializable
             {
                 System.out.println(e.getMessage());
             }
-
+            /* The button has been clicked and data has been retrieved. Activates the next scene UserViewController
+            *  and passes the retrieved data. */
             try
             {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
                 Parent root1 = fxmlLoader.load();
 
-                UserViewController userViewController = fxmlLoader.getController(); // Pass params to PatientViewController using method
+                UserViewController userViewController = fxmlLoader.getController();
                 userViewController.passBlockList(blockList);
                 userViewController.passPrivateKey(privateKey);
-                userViewController.passPatientPublicKey(publicKey);
+                userViewController.passPublicKey(publicKey);
+                userViewController.passPublicKeyAsString(publicKeyAsString);
 
 
                 Stage stage = new Stage();
@@ -184,57 +169,11 @@ public class UserSearchController implements Initializable
                 e.printStackTrace();
             }
 
-/*
-            if (rs.next())
-            {
-                try
-                {
-                    Socket socket = new Socket("127.0.0.1", 21149);
-                    socket.setSoTimeout(10000);
-                    OutputStream os = socket.getOutputStream();
-
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-                    try
-                    {
-                        writer.write(1);
-                        writer.newLine();
-                        writer.flush();
-                    }
-                    catch (IOException e)
-                    {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Failed to send packet");
-                        alert.setHeaderText(null);
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Connection to Blockchain failed");
-                    alert.setHeaderText(null);
-                    alert.setContentText(e.getMessage());
-                    alert.showAndWait();
-                }
-            }
-            else
-            {
-                System.out.println("Could not locate CPR number");
-                con.close();
-                return;
-            }
-            con.close();
-
-*/
         }
         catch(Exception e)
         {
             System.out.println(e.getMessage());
         }
 
-        /*
-
-        */
     }
 }

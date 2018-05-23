@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
 
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,8 @@ public class UserViewController implements Initializable
     private JFXButton makeJournal;
 
     private PrivateKey privateKey;
-    private String patientPublicKey;
+    private PublicKey publicKey;
+    private String publicKeyAsString;
     private List<Block> blockList;
 
     private int clickedJournal;
@@ -62,6 +64,7 @@ public class UserViewController implements Initializable
     public void getJournalButton(ActionEvent event)
     {
         try{
+            System.out.println("It reaches here");
             JournalGenerator journalGenerator = new JournalGenerator();
             AES AES = new AES();
             if(aJournalHasBeenClicked) {
@@ -69,6 +72,7 @@ public class UserViewController implements Initializable
                 System.out.println(retrievedJournal);
                 /* Splits lines separated by semicolon */
                 List<String> splitLinesList = Arrays.asList(retrievedJournal.split(":"));
+                System.out.println("It reaches here and the list is so long: " + splitLinesList.size());
                 // TJEK OM DER ER LIGE SÅ MANGE VARIABLER som der skal være
                 /* Inserts all the variables in JournalGenerator */
                 journalGenerator.makeJournal(splitLinesList.get(0), splitLinesList.get(1), splitLinesList.get(2), splitLinesList.get(3),
@@ -87,17 +91,20 @@ public class UserViewController implements Initializable
     {
         try
         {
+            /* Activates the JournalMakerController scene */
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/Journalmaker.fxml"));
             Parent root1 = fxmlLoader.load();
 
-            JournalMakerController controller = fxmlLoader.getController(); // Pass params to PatientViewController using method
-            controller.passPrivateKey(privateKey);
-            controller.passPatientPublicKey(patientPublicKey);
+            /* Passes privateKey, publicKey and publicKeyString to JournalMakerController */
+            JournalMakerController journalMakerController = fxmlLoader.getController();
+            journalMakerController.passPrivateKey(privateKey);
+            journalMakerController.passPublicKey(publicKey);
+            journalMakerController.passPatientPublicKey(publicKeyAsString);
 
             if (blockList.isEmpty())
-                controller.passBlockId(null);
+                journalMakerController.passBlockId(null);
             else
-                controller.passBlockId(blockList.get(0).id);
+                journalMakerController.passBlockId(blockList.get(0).id);
 
             Stage stage = new Stage();
             stage.setTitle("Journal Maker");
@@ -138,9 +145,13 @@ public class UserViewController implements Initializable
         this.privateKey = privateKey;
     }
 
-    public void passPatientPublicKey(String pubKey)
+    public void passPublicKeyAsString(String publicKeyAsString)
     {
-        patientPublicKey = pubKey;
+        this.publicKeyAsString = publicKeyAsString;
+    }
+
+    public void passPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 
     public int getClickedJournal() {
@@ -149,10 +160,6 @@ public class UserViewController implements Initializable
 
     public void setClickedJournal(int clickedJournal) {
         this.clickedJournal = clickedJournal;
-    }
-
-    public boolean isaJournalHasBeenClicked() {
-        return aJournalHasBeenClicked;
     }
 
     public void setaJournalHasBeenClicked(boolean aJournalHasBeenClicked) {

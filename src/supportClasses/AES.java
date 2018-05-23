@@ -17,8 +17,8 @@ public class AES {
      * COPY PASTE FROM https://gist.github.com/itarato/abef95871756970a9dad
      * ALL CREDITS TO : https://gist.github.com/itarato/abef95871756970a9dad
      */
-    public byte[] encrypt(String plainText, String key) throws Exception {
-        byte[] clean = plainText.getBytes();
+    public byte[] encrypt(String dataToBeEncrypted, String key) throws Exception {
+        byte[] clean = dataToBeEncrypted.getBytes();
 
         // Generating IV.
         int ivSize = 16;
@@ -81,7 +81,7 @@ public class AES {
         return new String(decrypted);
     }
 
-    byte[] getPublicKeyAndEncrypt(String cpr, SecretKeySpec AESKey) {
+    byte[] getPublicKeyAndEncryptAESKey(String cpr, String AESKey) {
         byte[] queryPublicKey = null;
         byte[] encryptedAESKey = null;
 
@@ -109,34 +109,70 @@ public class AES {
             }
         }
 
-        /* Encrypts AES key with public AES key */
+        /* Encrypts AES key with public RSA key */
         try {
-            /* Creates an instance of RSA cipher */
-            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            RSA RSA = new RSA();
             /* Converts the queried public key bytes to an public key */
             PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(queryPublicKey));
-            /* Initialize the cipher, telling it is going to encrypt */
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             /* Encrypts the key */
-            encryptedAESKey = cipher.doFinal(AESKey.getEncoded());
+            encryptedAESKey = RSA.encrypt(AESKey, publicKey);
             //System.out.println("AES key before encryption: " + AESKey);
             //System.out.println("Encrypted AES-Key: " + encryptedAESKey);
-        }catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        }
-        catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }catch (BadPaddingException e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
         //System.out.println("Returned encrypted key: " + encryptedAESKey);
         return encryptedAESKey;
+    }
+
+    public void saveAESToDB(String blockID, String AESKey) {
+        /* Uploads AES key to database */
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
+            String query = "INSERT INTO trans VALUES (?,?)";
+            pstmt = (PreparedStatement) conn.prepareStatement(query);
+            pstmt.setString(1, blockID);
+            pstmt.setString(2, AESKey);
+            pstmt.execute();
+        }catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                pstmt.close();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getAESFromDB(String blockID) {
+        /* Retrieves AES key from database */
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
+            Statement stmt = conn.createStatement();
+            //"SELECT cpr, rsapublickey FROM borger WHERE cpr = 0011223344"
+            String query = "SELECT blockid, aeskey FROM trans WHERE blockid = EQhLRx6LnBJjlOYWDdBxASQHnG5FN+Z1fMJEKnd1MSE=";
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            String AESKey =  rs.getString("aeskey");
+            pstmt.execute();
+            return AESKey;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                pstmt.close();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
