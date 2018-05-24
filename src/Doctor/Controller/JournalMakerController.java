@@ -2,7 +2,6 @@ package Doctor.Controller;
 
 import Doctor.Journal;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 
@@ -20,8 +19,12 @@ import supportClasses.RSA;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class JournalMakerController implements Initializable
 {
@@ -62,9 +65,9 @@ public class JournalMakerController implements Initializable
     @FXML
     private JFXButton cancel;
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
-    private String patientPublicKey;
+    private PrivateKey patientPrivateKey;
+    private PublicKey patientPublicKey;
+    private String patientPublicKeyAsString;
     private String journalBlockId;
 
     @Override
@@ -75,7 +78,7 @@ public class JournalMakerController implements Initializable
     public void saveButtonAction(ActionEvent event) throws Exception
     {
         checkIfEmptyField();
-        // Action when the save button has been pressed should be written here.
+        /* Creates journal with inputted data from the GUI */
         Journal journal = new Journal(patientName.getText(), CPR.getText(), printDate.getText(), startTDate.getText(), endTDate.getText(),
                 dateWritten.getText(), noteType.getText(), examinationDetails.getText(), diagnose.getText(), interpretedBy.getText(),
                 writtenBy.getText(), authenticatedBy.getText(), hospitalName.getText(), departmentName.getText(), uploadedBy.getText());
@@ -100,26 +103,40 @@ public class JournalMakerController implements Initializable
         String encryptedJournalDataString = Base64.encodeBase64String(encryptedJournalData);
 
         /* Encrypts AES-key */
-        byte[] encryptedAESKey = RSA.encrypt(aesKeyBase64, publicKey);
+        byte[] encryptedAESKey = RSA.encrypt(aesKeyBase64, patientPublicKey);
         String encryptedAESKeyString = Base64.encodeBase64String(encryptedAESKey);
 
 
+        /* The block should contain an SHA256-RSA-private-key-signed string of the journal-data named journalBlockID.
+         * In order to sign the data, an private key the blockchain recognize as legit is loaded first. */
+        BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get("C:\\GitHub\\Client\\src\\acceptedClientPrivateKey\\acceptedPrivateKey.txt")));
+        /* Saves the content of the file in privateKeyString */
+        String acceptedPrivateKeyString =  bufferedReader.lines().collect(Collectors.joining());
+        byte[] decodedPrivateKey = Base64.decodeBase64(acceptedPrivateKeyString);
+        PrivateKey acceptedPrivateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedPrivateKey));
 
+        /* Creates signature */
+        Signature signWithPrivateKey = Signature.getInstance("SHA256WithRSA");
+        /* Initializes signature with the private key the blockchain accepts */
+        signWithPrivateKey.initSign(acceptedPrivateKey);
+        /* If there existed no blocks in the patients blockList prior to this, the journalBlockID is the patients publicKey.
+           If there did exist an block the journalBlockID is the previous block id + the patients public key.
+           This makes sure the journalBlockID is always unique for each block.
+           After creating journalBLockID the journalBlockID is signed with the acceptedPrivateKey */
+        if (journalBlockId == null) {
+            signWithPrivateKey.update(patientPublicKeyAsString.getBytes());
+            System.out.println("Creating first block for this user");
+        }
+        else {
+            signWithPrivateKey.update((journalBlockId + patientPublicKeyAsString).getBytes());
+            System.out.println("There was an previous block");
+        }
 
-        /* If there existed no blocks in the patients blockList prior to this, the blockID is the patients SHA256-hashed public key.
-           If there did exist an block the blockID is the previous block id + the patients public key, hashed with SHA256. */
-        Signature sig = Signature.getInstance("SHA256WithRSA");
-        sig.initSign(privateKey);
-        if (journalBlockId == null)
-            sig.update(patientPublicKey.getBytes());
-        else
-            sig.update((journalBlockId+patientPublicKey).getBytes());
-
-        byte[] signedBlock = sig.sign();
-        String signedBlockAsString = Base64.encodeBase64String(signedBlock);
+        byte[] signedJournalBlockID = signWithPrivateKey.sign();
+        String signedJournalBlockIDasString = Base64.encodeBase64String(signedJournalBlockID);
 
         /* Uploads AES-key to database */
-        AES.saveAESToDB(signedBlockAsString, aesKeyBase64);
+        AES.saveAESToDB(signedJournalBlockIDasString, aesKeyBase64);
 
         Socket socket = new Socket("127.0.0.1", 21149);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -127,10 +144,10 @@ public class JournalMakerController implements Initializable
         // Send packet using opcode 1
         bufferedWriter.write(1);
         /* sends unique block ID, which is the signed private key */
-        bufferedWriter.write(signedBlockAsString);
+        bufferedWriter.write(signedJournalBlockIDasString);
         bufferedWriter.newLine();
 
-        bufferedWriter.write(patientPublicKey);
+        bufferedWriter.write(patientPublicKeyAsString);
         bufferedWriter.newLine();
 
         bufferedWriter.write(encryptedAESKeyString);
@@ -202,7 +219,7 @@ public class JournalMakerController implements Initializable
 
     public void passPrivateKey(PrivateKey privKey)
     {
-        privateKey = privKey;
+        patientPrivateKey = privKey;
     }
 
     public void passBlockId(String blockId)
@@ -212,11 +229,11 @@ public class JournalMakerController implements Initializable
 
     public void passPatientPublicKey(String pubKey)
     {
-        patientPublicKey = pubKey;
+        patientPublicKeyAsString = pubKey;
     }
 
     public void passPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
+        this.patientPublicKey = publicKey;
     }
 }
 

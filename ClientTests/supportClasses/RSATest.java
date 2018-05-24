@@ -20,7 +20,7 @@ class RSATest {
     @Test
     void saveKeyPairTest() {
         RSA rsa = new RSA();
-        rsa.saveKeyPair("0011223344");
+        rsa.savePatientKeyPair("0011223344");
     }
 
     @Test
@@ -79,5 +79,12 @@ class RSATest {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void saveAcceptedClientKeyPair() {
+        RSA RSA = new RSA();
+        RSA.saveAcceptedClientKeyPair("C:\\GitHub\\Client\\src\\acceptedClientPrivateKey",
+                "C:\\GitHub\\Blockchain\\acceptedClientsPublicKeys");
     }
 }

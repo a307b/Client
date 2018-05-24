@@ -5,6 +5,7 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Cipher;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +20,7 @@ public class RSA {
     // Method used to generate and save keys. Private keys are stored in the privateKey directory and
     // public keys are uploaded to BorgerDB
     /* CPR number is used as the private keys local file name and as ID when it is uploaded to BorgerDB */
-    public void saveKeyPair(String CPR) {
+    public void savePatientKeyPair(String CPR) {
         /* Generates key-pair */
         KeyPair keyPair = null;
         try {
@@ -68,6 +69,43 @@ public class RSA {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void saveAcceptedClientKeyPair(String doctorPrivateKeyDirectory,
+                                  String blockChainPublicKeyDirectory) {
+        /* Generates key-pair */
+        KeyPair keyPair = null;
+        try {
+            keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        /* Makes public and private key into strings withe Base64 */
+        String publicKeyString = Base64.encodeBase64String(keyPair.getPublic().getEncoded());
+        String privateKeyString = Base64.encodeBase64String(keyPair.getPrivate().getEncoded());
+
+        /* The name of the privateKey file is hardcoded to acceptedPrivateKey, since each doctor client
+           should only have one accepted private key to verify themselves  */
+        Path privateKeyfilePath = Paths.get( doctorPrivateKeyDirectory + "\\acceptedPrivateKey.txt");
+        String publicKeyFilePathPublic = blockChainPublicKeyDirectory + "\\publicKeyList.txt";
+        /* Saves private key */
+        try(BufferedWriter bufferedWriter = new BufferedWriter(Files.newBufferedWriter(privateKeyfilePath))) {
+            bufferedWriter.write(privateKeyString);   // Saves file
+        }
+        catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+
+        /* Saves acceptedPublicKey. The acceptedPublic key should be appended to the publicKeyList, therefore
+         * the slower FileWriter is used instead since BufferedFileWriter does not support append. */
+        try(FileWriter fileWriter = new FileWriter(publicKeyFilePathPublic, true)) {
+            fileWriter.write(publicKeyString);
+            fileWriter.write(System.getProperty( "line.separator" ));
+        }
+        catch (java.io.IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -41,9 +41,9 @@ public class UserViewController implements Initializable
     @FXML
     private JFXButton makeJournal;
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
-    private String publicKeyAsString;
+    private PrivateKey patientPrivateKey;
+    private PublicKey patientPublicKey;
+    private String patientPublicKeyAsString;
     private List<Block> blockList;
 
     private int clickedJournal;
@@ -90,11 +90,11 @@ public class UserViewController implements Initializable
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/Journalmaker.fxml"));
             Parent root1 = fxmlLoader.load();
 
-            /* Passes privateKey, publicKey and publicKeyString to JournalMakerController */
+            /* Passes patientPrivateKey, patientPublicKey and publicKeyString to JournalMakerController */
             JournalMakerController journalMakerController = fxmlLoader.getController();
-            journalMakerController.passPrivateKey(privateKey);
-            journalMakerController.passPublicKey(publicKey);
-            journalMakerController.passPatientPublicKey(publicKeyAsString);
+            journalMakerController.passPrivateKey(patientPrivateKey);
+            journalMakerController.passPublicKey(patientPublicKey);
+            journalMakerController.passPatientPublicKey(patientPublicKeyAsString);
 
             /* If the blockList for the user is not empty, pass the most recent block's ID. */
             if (blockList.isEmpty())
@@ -120,7 +120,6 @@ public class UserViewController implements Initializable
         if(jfxViewList.getSelectionModel().getSelectedIndex() != -1) {
             setClickedJournal(jfxViewList.getSelectionModel().getSelectedIndex());
             setaJournalHasBeenClicked(true);
-            System.out.println("clicked on " + jfxViewList.getSelectionModel().getSelectedIndex());
         }
     }
 
@@ -137,16 +136,16 @@ public class UserViewController implements Initializable
 
     public void passPrivateKey(PrivateKey privateKey)
     {
-        this.privateKey = privateKey;
+        this.patientPrivateKey = privateKey;
     }
 
     public void passPublicKeyAsString(String publicKeyAsString)
     {
-        this.publicKeyAsString = publicKeyAsString;
+        this.patientPublicKeyAsString = publicKeyAsString;
     }
 
     public void passPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
+        this.patientPublicKey = publicKey;
     }
 
     public int getClickedJournal() {

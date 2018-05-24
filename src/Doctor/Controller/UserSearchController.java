@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 
 public class UserSearchController implements Initializable
 {
-    PrivateKey privateKey;
-    String privateKeyLocation = "C:\\GitHub\\Clinet_newtemp\\src\\privateKeys";
-    /* The public key is needed as both an String and publicKey throughout the program. To avoid unnecessary typecasting
+    PrivateKey patientPrivateKey;
+    String privateKeyLocation = "C:\\GitHub\\PatientClient\\src\\privateKeys";
+    /* The patients public key is needed as both an String and patientPublicKey throughout the program. To avoid unnecessary typecasting
      * which if done carelessly might result in padding-errors, there exist an variable for both. */
-    PublicKey publicKey;
-    String publicKeyAsString;
+    PublicKey patientPublicKey;
+    String patientPublicKeyAsString;
 
     @FXML
     private JFXTextField cprTextField;
@@ -89,22 +89,22 @@ public class UserSearchController implements Initializable
 
             /* Reads public key from database */
             byte[] publicKeyBytes =  rs.getBytes("rsapublickey");
-            publicKeyAsString = rs.getString("rsapublickey");
+            patientPublicKeyAsString = rs.getString("rsapublickey");
 
             /* Converts the retrieved public key to an public key */
             byte[] decodedPublicKey = Base64.decodeBase64(publicKeyBytes);
-            publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPublicKey));
+            patientPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPublicKey));
 
 
             /* Reads and save the private key of the entered CPR */
             try {
-                /* Retrieves privateKey string from local file and converts it into an private key */
+                /* Retrieves patientPrivateKey string from local file and converts it into an private key */
                 BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get(privateKeyLocation+"\\"+ cprString +".txt")));
                 /* Saves the content of the file in privateKeyString */
                 String privateKeyString = bufferedReader.lines().collect(Collectors.joining());
                 System.out.println(privateKeyString);
                 byte[] decodedPrivateKey = Base64.decodeBase64(privateKeyString);
-                privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedPrivateKey));
+                patientPrivateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedPrivateKey));
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -120,7 +120,7 @@ public class UserSearchController implements Initializable
                  * Afterwards sends the public key to search for existing blocks of that cpr. */
 
                 bufferedWriter.write(0);
-                bufferedWriter.write(publicKeyAsString);
+                bufferedWriter.write(patientPublicKeyAsString);
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
 
@@ -150,9 +150,9 @@ public class UserSearchController implements Initializable
 
                 UserViewController userViewController = fxmlLoader.getController();
                 userViewController.passBlockList(blockList);
-                userViewController.passPrivateKey(privateKey);
-                userViewController.passPublicKey(publicKey);
-                userViewController.passPublicKeyAsString(publicKeyAsString);
+                userViewController.passPrivateKey(patientPrivateKey);
+                userViewController.passPublicKey(patientPublicKey);
+                userViewController.passPublicKeyAsString(patientPublicKeyAsString);
 
 
                 Stage stage = new Stage();
