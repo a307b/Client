@@ -39,16 +39,6 @@ public class JournalGenerator
             final int standardFont = 10;
             document.setFont(font).setFontSize(standardFont);
 
-            //Paragraph objects
-            /*  Pseudo variables for tests
-            QueryVariables queryVariables = new QueryVariables("Bob", "1234567890", "21.3.2018","10.3.2018", "20.3.2018", "19.3.2018", "Røntgennote",
-                    "Undersøgelsen er foretaget som postoperativ kontrol.\n" +
-                            "Der ses sammenholdt medundersøgelsen fra29.07.17, at den tidligere\n" +
-                            "påviste fraktur vedproksimalehøjre femur, nu er behandlet med total\n" +
-                            "hoftealloplastik, som ses i god stilling i alle planer", "postoperativ kontrol",
-                    "Anders Bensen", "Ib Jensen", "Dennis Krieger", "Aalborg Universitetshospital",
-                    "Alb Røntgen Amb", "Alb O-kir sengeafdeling");
-            */
             QueryVariables queryVariables = new QueryVariables(patientName,  CPR,  printDate,  startTDate,  endTDate,
                     dateWritten,  noteType,  examinationDetails,  diagnose,  interpretedBy,
                     writtenBy,  authenticatedBy,  hospitalName,  departmentName,  uploadedBy);
