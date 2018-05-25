@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 
 public class UserSearchController implements Initializable
 {
-    PrivateKey patientPrivateKey;
-    String privateKeyLocation = "C:\\GitHub\\PatientClient\\src\\privateKeys";
+    private PrivateKey patientPrivateKey;
+    private String privateKeyLocation = "C:\\GitHub\\PatientClient\\src\\privateKeys";
     /* The patients public key is needed as both an String and patientPublicKey throughout the program. To avoid unnecessary typecasting
      * which if done carelessly might result in padding-errors, there exist an variable for both. */
-    PublicKey patientPublicKey;
-    String patientPublicKeyAsString;
+    private PublicKey patientPublicKey;
+    private String patientPublicKeyAsString;
 
     @FXML
     private JFXTextField cprTextField;

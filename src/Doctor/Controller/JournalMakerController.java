@@ -109,7 +109,7 @@ public class JournalMakerController implements Initializable
 
         /* The block should contain an SHA256-RSA-private-key-signed string of the journal-data named journalBlockID.
          * In order to sign the data, an private key the blockchain recognize as legit is loaded first. */
-        BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get("C:\\GitHub\\Client\\src\\acceptedClientPrivateKey\\acceptedPrivateKey.txt")));
+        BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get("C:\\GitHub\\DoctorClient\\src\\acceptedClientPrivateKey\\acceptedPrivateKey.txt")));
         /* Saves the content of the file in privateKeyString */
         String acceptedPrivateKeyString =  bufferedReader.lines().collect(Collectors.joining());
         byte[] decodedPrivateKey = Base64.decodeBase64(acceptedPrivateKeyString);
