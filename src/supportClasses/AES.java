@@ -1,14 +1,9 @@
 package supportClasses;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.sql.*;
 
 public class AES {
@@ -77,47 +72,6 @@ public class AES {
         byte[] decrypted = cipherDecrypt.doFinal(encryptedBytes);
 
         return new String(decrypted);
-    }
-
-    byte[] getPublicKeyAndEncryptAESKey(String cpr, String AESKey) {
-        byte[] queryPublicKey = null;
-        byte[] encryptedAESKey = null;
-
-        Connection conn = null;
-        Statement stmt = null;
-
-        /* Retrieves public key from database */
-        try {
-            conn = DriverManager.getConnection("jdbc:mysql://195.201.113.131/p2?useSSL=false", "p2", "Q23wa!!!");
-            stmt = conn.createStatement();
-            String query = "SELECT cpr, rsapublickey FROM BorgerDB WHERE cpr = " + cpr;
-            ResultSet resultSet = stmt.executeQuery(query);
-            while(resultSet.next()){
-                queryPublicKey  = resultSet.getBytes("rsapublickey");
-                System.out.print("Public key " + queryPublicKey + "\n");
-            }
-        }catch (java.sql.SQLException sqlException) {
-            sqlException.printStackTrace();
-        }finally {
-            try {
-                stmt.close();
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        /* Encrypts AES key with public RSA key */
-        try {
-            RSA RSA = new RSA();
-            /* Converts the queried public key bytes to an public key */
-            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(queryPublicKey));
-            /* Encrypts the key */
-            encryptedAESKey = RSA.encrypt(AESKey, publicKey);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return encryptedAESKey;
     }
 
     public void saveAESToDB(String blockID, String AESKey) {
