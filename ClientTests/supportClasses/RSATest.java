@@ -16,11 +16,19 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RSATest {
-    /* Caution: There may only be one 0011223344 entry in the table in the database, otherwise an error will occur. */
+    /* Caution: There may only be one 0011223344 entry in the table in the database,
+       otherwise an error will occur. */
     @Test
     void saveKeyPairTest() {
         RSA rsa = new RSA();
         rsa.savePatientKeyPair("0011223344");
+    }
+
+    @Test
+    void saveAcceptedClientKeyPair() {
+        RSA RSA = new RSA();
+        RSA.saveAcceptedClientKeyPair("C:\\GitHub\\Client\\src\\acceptedClientPrivateKey",
+                "C:\\GitHub\\Blockchain\\acceptedClientsPublicKeys");
     }
 
     @Test
@@ -30,7 +38,6 @@ class RSATest {
             RSA RSA = new RSA();
             String testString = "hello world";
             byte[] encryptedString = RSA.encrypt(testString, keyPair.getPublic());
-            System.out.println(encryptedString);
             String decryptedString = RSA.decrypt(encryptedString, keyPair.getPrivate());
             assertEquals(testString, decryptedString);
         }catch (Exception e) {
@@ -44,12 +51,14 @@ class RSATest {
     void saveKeyPairEncryptionDecryptionTest() {
         try {
             /* Retrieves privateKey string from local file and converts it into an private key */
-            BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(Paths.get("C:\\GitHub\\Patient\\src\\privateKeys\\0011223344.txt")));
+            BufferedReader bufferedReader = new BufferedReader(Files.newBufferedReader(
+                    Paths.get("C:\\GitHub\\Patient\\src\\privateKeys\\0011223344.txt")));
             /* Saves the content of the file in privateKeyString */
             String privateKeyString =  bufferedReader.lines().collect(Collectors.joining());
             System.out.println(privateKeyString);
             byte[] decodedPrivateKey = Base64.decodeBase64(privateKeyString);
-            PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedPrivateKey));
+            PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new
+                    PKCS8EncodedKeySpec(decodedPrivateKey));
 
 
             /* Connects to database, reads the rsapublickey from the entry where CPR is 0011223344 */
@@ -79,12 +88,5 @@ class RSATest {
         catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Test
-    void saveAcceptedClientKeyPair() {
-        RSA RSA = new RSA();
-        RSA.saveAcceptedClientKeyPair("C:\\GitHub\\Client\\src\\acceptedClientPrivateKey",
-                "C:\\GitHub\\Blockchain\\acceptedClientsPublicKeys");
     }
 }

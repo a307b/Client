@@ -141,8 +141,8 @@ public class UserSearchController implements Initializable
             {
                 System.out.println(e.getMessage());
             }
-            /* The button has been clicked and data has been retrieved. Activates the next scene UserViewController
-            *  and passes the retrieved data. */
+            /* The button has been clicked and data has been retrieved. Activates the
+               next scene UserViewController and passes the retrieved data. */
             try
             {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Design/UserView.fxml"));
